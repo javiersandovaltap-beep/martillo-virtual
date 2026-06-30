@@ -17,7 +17,6 @@ class Subasta(models.Model):
     imagen         = models.ImageField(upload_to="subastas/", blank=True, null=True)
     precio_inicial = models.DecimalField(max_digits=12, decimal_places=2)
     estado         = models.CharField(max_length=20, choices=Estado.choices, default=Estado.ACTIVA)
-    fecha_inicio   = models.DateTimeField(auto_now_add=True)
     fecha_cierre   = models.DateTimeField()
     creado_en      = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)

@@ -89,7 +89,7 @@
           {% endif %}
           <hr class="divider" style="margin-top:var(--space-6);" />
           <div style="display:flex;flex-direction:column;gap:var(--space-2);">
-            <div style="display:flex;justify-content:space-between;font-size:var(--text-xs);"><span style="color:var(--color-text-faint);">Inicio</span><span style="color:var(--color-text-muted);">{{ subasta.fecha_inicio|date:"d M Y" }}</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:var(--text-xs);"><span style="color:var(--color-text-faint);">Inicio</span><span style="color:var(--color-text-muted);">{{ subasta.creado_en|date:"d M Y" }}</span></div>
             <div style="display:flex;justify-content:space-between;font-size:var(--text-xs);"><span style="color:var(--color-text-faint);">Cierre</span><span style="color:var(--color-text-muted);">{{ subasta.fecha_cierre|date:"d M Y H:i" }}</span></div>
           </div>
         </div>

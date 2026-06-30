@@ -5,11 +5,11 @@
 
 ## Current state
 
-- Phase: 0 (Recovery + Migrations Audit) - completed
-- Last commit: chore: Fase 0 baseline (English .md files per L01)
-- Last tag: v0.1-stable
+- Phase: 1 (Critical blockers + Security audit) - completed
+- Last commit: docs: update SESSION_STATE.md for Phase 1 closure
+- Last tag: v0.2-stable (pending)
 - Blockers: none
-- Next step: Phase 1 (Critical blockers + Security audit)
+- Next step: Phase 2 (Workflow discipline + Config split)
 
 ## Project context
 
@@ -34,6 +34,18 @@
 - Created operational files in English (L01): SESSION_STATE.md, CLAUDE.md, AGENTS.md, ALTERNATIVES.md
 - Created subagents: .claude/agents/*.md (6 agents in English)
 - git init + baseline commit + tag v0.1-stable
+
+### Phase 1 - Critical blockers + Security audit (v0.2-stable)
+- security(S02): SECRET_KEY con fallback graceful a ImproperlyConfigured (3034df4)
+- security(S03): ALLOWED_HOSTS parsing filtra strings vacios (e27b513)
+- security(S09): SECURE_PROXY_SSL_HEADER para reverse proxy de Render (b21268b)
+- security(S10): HSTS 300s inicial, subir a 1 ano en Fase 5 (0afa99f)
+- security(B07): fix open redirect in login_view with url_has_allowed_host_and_scheme (8bf3758) - verified with 5/5 attack vector tests
+- fix(B08): add @require_POST to ofertar view (3a24ec2) - verified with 3/3 method validation tests
+- fix(B09): add @require_POST to logout_view, remove internal method check (2c962cb) - verified with 4/4 method validation tests
+- fix(B02): wrap ofertar in transaction.atomic + select_for_update (eb45817) - verified with 2/2 race condition tests
+- docs: L22 (NIM timeout recovery), L23 (Layer 1 does not validate security), L24 (Git Bash + Windows native commands), L25 (Django test client HTTP_HOST)
+
 
 ## Lessons
 
@@ -98,15 +110,15 @@
 
 | ID | Description | Phase | Status |
 |----|-------------|-------|--------|
-| B01 | ofertar() does not validate POST method | Phase 1 | pending |
-| B02 | Race condition in ofertar() | Phase 1 | pending |
+| B01 | (merged into B08) | Phase 1 | closed |
+| B02 | Race condition in ofertar() | Phase 1 | fixed (eb45817) |
 | B03 | N+1 in precio_actual/total_ofertas | Phase 3 | pending |
 | B04 | N+1 in MisSubastasView | Phase 3 | pending |
 | B05 | InicioView executes queryset 2x | Phase 3 | pending |
 | B06 | form_oferta in context but not rendered | Phase 3 | pending |
-| B07 | Open redirect in login_view | Phase 1 | pending |
+| B07 | Open redirect in login_view | Phase 1 | fixed (8bf3758) |
 | B08 | seed_data.py broken (ESTADO_ACTIVA) | Phase 0 | fixed |
-| B09 | Logout without @require_POST | Phase 1 | pending |
+| B09 | Logout without @require_POST | Phase 1 | fixed (2c962cb) |
 | B10 | fecha_inicio and creado_en redundant | Phase 3 | pending |
 | F01 | "En vivo" badge unconditional | Phase 3 | pending |
 | F02 | Stats counter inconsistent with badge | Phase 3 | pending |
@@ -116,14 +128,14 @@
 | D02 | No index on Subasta.estado, fecha_cierre | Phase 3 | pending |
 | D04 | Migrations squashable | Phase 5 | pending |
 | S01 | SECRET_KEY exposed in zip | Phase 0 | rotated |
-| S02 | SECRET_KEY without graceful fallback | Phase 1 | pending |
-| S03 | ALLOWED_HOSTS parsing fragile | Phase 1 | pending |
-| S05 | Open redirect (see B07) | Phase 1 | pending |
-| S06 | /admin/ exposed without protection | Phase 1 | confirmed Option A |
+| S02 | SECRET_KEY without graceful fallback | Phase 1 | fixed (3034df4) |
+| S03 | ALLOWED_HOSTS parsing fragile | Phase 1 | fixed (e27b513) |
+| S05 | Open redirect (see B07) | Phase 1 | fixed (8bf3758) |
+| S06 | /admin/ exposed without protection | Phase 1 | confirmed Option A (D05) |
 | S07 | No rate limiting in auth | Phase 4 | pending |
 | S08 | README lies about CSP | Phase 5 | pending |
-| S09 | No SECURE_PROXY_SSL_HEADER | Phase 1 | pending |
-| S10 | HSTS 1 year without pre-commit warn | Phase 1 | pending |
+| S09 | No SECURE_PROXY_SSL_HEADER | Phase 1 | fixed (b21268b) |
+| S10 | HSTS 1 year without pre-commit warn | Phase 1 | fixed (0afa99f) |
 | C01 | requirements vs venv mismatch | Phase 0 | fixed |
 | C02 | martillo_v3/ stale | Phase 0 | removed |
 | C04 | No git init | Phase 0 | fixed |

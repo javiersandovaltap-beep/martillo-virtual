@@ -71,6 +71,7 @@
 ### New from martillo_virtual (L21+)
 
 - L21: git show --stat HEAD can show duplicated files in the diff (presentation artifact). The final tree has NO duplicates. Always validate with git ls-tree -r HEAD --name-only | sort | uniq -c | awk '$1 > 1' before assuming a broken commit
+- L22: NIM (Minimax M2.7) can return 'Decode wall clock timeout after 600s' during complex tasks. Claude Code appears frozen for up to 10 minutes. A user nudge (e.g. 'Finish the task') can resume execution. The timeout is transitory (L02) and does not corrupt partial work. If it recurs, consider splitting the prompt into smaller subtasks.
 
 ## Decisions log
 

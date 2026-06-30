@@ -26,7 +26,13 @@ class InicioView(ListView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["total_subastas"] = self.get_queryset().count()
+        # Use paginator.count (already calculated by ListView) instead of
+        # running a separate COUNT query via self.get_queryset().count()
+        paginator = ctx.get("paginator")
+        if paginator:
+            ctx["total_subastas"] = paginator.count
+        else:
+            ctx["total_subastas"] = self.object_list.count()
         return ctx
 
 

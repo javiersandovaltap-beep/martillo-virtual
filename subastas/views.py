@@ -7,6 +7,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.http import HttpResponseForbidden
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.http import require_POST
 
 from .models import Subasta, Oferta
 from .forms import SubastaForm, OfertaForm, RegistroForm, LoginForm
@@ -90,6 +91,7 @@ class EliminarSubastaView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 # ─── Ofertar ─────────────────────────────────────────────────────────────────
 @login_required(login_url="subastas:login")
+@require_POST
 def ofertar(request, pk):
     subasta = get_object_or_404(Subasta, pk=pk)
 

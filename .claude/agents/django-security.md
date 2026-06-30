@@ -27,6 +27,7 @@ You can read and edit:
 
 ## Rules (mandatory)
 
+0. **L23:** Layer 1 (`python manage.py check`) does NOT validate security logic. A wrong security fix (e.g., `allowed_hosts=None` defeats `url_has_allowed_host_and_scheme`) can pass Layer 1. Always verify security fixes with actual attack vector tests (Layer 3 with malicious input, or dedicated security tests in Phase 4). Do not trust Layer 1 alone for security fixes.
 1. Always run `python manage.py check --deploy` after security changes
 2. Never commit secrets (.env, API keys, passwords) to git
 3. ASCII-only in .md files
@@ -81,17 +82,26 @@ You can read and edit:
 - [ ] pip audit (no known vulnerabilities)
 - [ ] Requirements pinned (already done)
 
-## Known security debt (from analysis)
+## Known security debt (updated post-Phase 1)
 
-- S01: SECRET_KEY was in .env that traveled in zip (rotated in Fase 0)
-- S02: SECRET_KEY = os.environ["SECRET_KEY"] raises KeyError (no graceful fallback)
-- S03: ALLOWED_HOSTS parsing returns [""] if env missing
-- S05: Open redirect in login_view (B07)
-- S06: /admin/ exposed without rate limiting or IP restriction
-- S07: No rate limiting on login/registro
-- S08: README lies about CSP (not configured)
-- S09: No SECURE_PROXY_SSL_HEADER for Render
-- S10: HSTS 1 year without pre-commit warning (start with 300)
+Status legend: FIXED = closed in Phase 1, PENDING = future phase, OK = no issue
+
+- S01: SECRET_KEY was in .env that traveled in zip -- FIXED (rotated in Phase 0)
+- S02: SECRET_KEY = os.environ["SECRET_KEY"] raises KeyError -- FIXED (3034df4, graceful ImproperlyConfigured)
+- S03: ALLOWED_HOSTS parsing returns [""] if env missing -- FIXED (e27b513, list comprehension filters empty)
+- S05: Open redirect in login_view -- FIXED (8bf3758, url_has_allowed_host_and_scheme, verified 5/5 tests)
+- S06: /admin/ exposed without rate limiting -- PENDING Phase 4 (confirmed Option A: standard URL + rate limiting)
+- S07: No rate limiting on login/registro -- PENDING Phase 4 (django-ratelimit, decision D09)
+- S08: README lies about CSP -- PENDING Phase 5 (rewrite README without false claims)
+- S09: No SECURE_PROXY_SSL_HEADER for Render -- FIXED (b21268b)
+- S10: HSTS 1 year without pre-commit warning -- FIXED (0afa99f, start with 300s, raise to 1 year in Phase 5)
+- S11: No XSS/SQLi detected -- OK (verified: no mark_safe, no .raw(), no .extra())
+
+Also fixed in Phase 1 (not in original security debt list but related):
+- B07/S05: Open redirect -- FIXED
+- B08: ofertar() accepts GET -- FIXED (3a24ec2, @require_POST, verified 3/3 tests)
+- B09: logout_view accepts GET -- FIXED (2c962cb, @require_POST, verified 4/4 tests)
+- B02: Race condition in ofertar() -- FIXED (eb45817, transaction.atomic + select_for_update, verified 2/2 tests)
 
 ## When to delegate to other agents
 

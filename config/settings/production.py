@@ -14,7 +14,9 @@ DATABASES = {
 }
 
 SECURE_SSL_REDIRECT            = True
-SECURE_HSTS_SECONDS            = 31_536_000
+# Empezar con 5 minutos. Subir a 31536000 (1 ano) en Fase 5 post-deploy exitoso.
+# HSTS es irreversible por la duracion configurada en browsers que visiten.
+SECURE_HSTS_SECONDS = 300
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD            = True
 SESSION_COOKIE_SECURE          = True

@@ -22,3 +22,4 @@ CSRF_COOKIE_SECURE             = True
 SECURE_CONTENT_TYPE_NOSNIFF    = True
 X_FRAME_OPTIONS                = "DENY"
 SECURE_REFERRER_POLICY         = "strict-origin-when-cross-origin"
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

@@ -1,11 +1,17 @@
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
 
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-SECRET_KEY = os.environ["SECRET_KEY"]
+SECRET_KEY = os.environ.get("SECRET_KEY")
+if not SECRET_KEY:
+    raise ImproperlyConfigured(
+        "SECRET_KEY no definida en .env. "
+        "Genera una con: python -c \"from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())\""
+    )
 
 INSTALLED_APPS = [
     "django.contrib.admin",

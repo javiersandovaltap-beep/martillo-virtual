@@ -26,6 +26,7 @@ You can read and edit:
 
 ## Rules (mandatory)
 
+0. **L25:** Django test client uses `testserver` as default HTTP_HOST. In dev settings with `ALLOWED_HOSTS = ['localhost', '127.0.0.1']` (no `testserver`), ALL test client requests fail with `DisallowedHost` 400 BEFORE reaching the view. False positive: test scripts that only check 'evil.com not in Location' will PASS even though the view never ran. ALWAYS use `Client(HTTP_HOST='localhost')` in test scripts, or add `testserver` to ALLOWED_HOSTS in test settings.
 1. Always run tests after writing them: `python manage.py test` or `pytest`
 2. Test file naming: test_*.py (pytest convention, also works with Django TestCase)
 3. Test class naming: TestXxx (pytest) or XxxTest (Django TestCase)

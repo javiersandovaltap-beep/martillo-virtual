@@ -25,3 +25,7 @@ SECURE_CONTENT_TYPE_NOSNIFF    = True
 X_FRAME_OPTIONS                = "DENY"
 SECURE_REFERRER_POLICY         = "strict-origin-when-cross-origin"
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# Override base.py: use Manifest version in prod (requires collectstatic,
+# which Render runs during build phase)
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"

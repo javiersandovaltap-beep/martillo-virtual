@@ -4,8 +4,9 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import redirect, render, get_object_or_404
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.http import HttpResponseForbidden
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from .models import Subasta, Oferta
 from .forms import SubastaForm, OfertaForm, RegistroForm, LoginForm
@@ -150,7 +151,15 @@ def login_view(request):
     if form.is_valid():
         user = form.get_user()
         login(request, user)
-        next_url = request.GET.get("next", "subastas:inicio")
+        next_url = request.GET.get("next", "")
+        if not (
+            next_url
+            and url_has_allowed_host_and_scheme(
+                next_url,
+                allowed_hosts={request.get_host()},
+            )
+        ):
+            next_url = "subastas:inicio"
         return redirect(next_url)
     return render(request, "subastas/login.html", {"form": form})
 

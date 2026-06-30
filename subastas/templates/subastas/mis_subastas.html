@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Mis Subastas{% endblock %}
+{% block content %}
+<section class="page-section">
+  <div class="container">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);margin-bottom:var(--space-8);">
+      <div>
+        <h1 style="font-family:var(--font-display);font-size:var(--text-2xl);font-weight:800;letter-spacing:-0.03em;margin-bottom:var(--space-1);">Mis Subastas</h1>
+        <p style="color:var(--color-text-muted);font-size:var(--text-sm);">Gestiona tus piezas · {{ user.username }}</p>
+      </div>
+      <a href="{% url 'subastas:crear' %}" class="btn btn--primary btn--lg">+ Publicar nueva pieza</a>
+    </div>
+    <div class="stats-bar">
+      <div class="stat-card"><div class="stat-card__number">{{ total|default:"0" }}</div><div class="stat-card__label">Total publicadas</div></div>
+      <div class="stat-card"><div class="stat-card__number" style="color:var(--color-success);">{{ activas|default:"0" }}</div><div class="stat-card__label">Activas ahora</div></div>
+      <div class="stat-card"><div class="stat-card__number" style="color:var(--color-text-faint);">{{ cerradas|default:"0" }}</div><div class="stat-card__label">Cerradas</div></div>
+      <div class="stat-card"><div class="stat-card__number">{{ total_ofertas_recibidas|default:"0" }}</div><div class="stat-card__label">Ofertas recibidas</div></div>
+    </div>
+    {% if subastas %}
+      <div class="dashboard-table-wrap" style="display:none;" id="table-view">
+        <table class="bids-table">
+          <thead><tr><th>Pieza</th><th>Precio actual</th><th>Ofertas</th><th>Estado</th><th>Cierre</th><th>Acciones</th></tr></thead>
+          <tbody>
+            {% for subasta in subastas %}
+              <tr>
+                <td><a href="{% url 'subastas:detalle' subasta.pk %}" style="color:var(--color-text);text-decoration:none;font-weight:600;font-family:var(--font-display);">{{ subasta.titulo|truncatewords:7 }}</a></td>
+                <td style="font-weight:700;color:var(--color-gold);font-variant-numeric:tabular-nums;">${{ subasta.precio_actual }}</td>
+                <td style="color:var(--color-text-muted);">{{ subasta.total_ofertas }}</td>
+                <td>{% if subasta.esta_activa %}<span class="badge badge--active">Activa</span>{% else %}<span class="badge badge--closed">{{ subasta.get_estado_display }}</span>{% endif %}</td>
+                <td style="color:var(--color-text-faint);font-size:var(--text-xs);">{{ subasta.fecha_cierre|date:"d/m/Y H:i" }}</td>
+                <td><div class="row-actions"><a href="{% url 'subastas:detalle' subasta.pk %}" class="btn btn--ghost btn--sm">Ver</a><a href="{% url 'subastas:editar' subasta.pk %}" class="btn btn--ghost btn--sm">Editar</a><a href="{% url 'subastas:eliminar' subasta.pk %}" class="btn btn--danger btn--sm">✕</a></div></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="auction-grid" id="card-view">
+        {% for subasta in subastas %}
+          <article class="auction-card fade-in-up" style="opacity:0;">
+            <div class="auction-card__image">
+              {% if subasta.imagen %}<img src="{{ subasta.imagen.url }}" alt="{{ subasta.titulo }}" loading="lazy" width="400" height="300" />{% else %}<div class="auction-card__placeholder"></div>{% endif %}
+              {% if subasta.esta_activa %}<span class="auction-card__status">En vivo</span>{% endif %}
+              <span class="auction-card__badge">{{ subasta.total_ofertas }} oferta{{ subasta.total_ofertas|pluralize:"s" }}</span>
+            </div>
+            <div class="auction-card__body">
+              <h3 class="auction-card__title">{{ subasta.titulo }}</h3>
+              <div class="auction-card__footer">
+                <div><div class="auction-card__price-label">Precio actual</div><div class="auction-card__price">${{ subasta.precio_actual }}</div></div>
+                <div style="display:flex;gap:var(--space-2);"><a href="{% url 'subastas:editar' subasta.pk %}" class="btn btn--ghost btn--sm">✏️</a><a href="{% url 'subastas:eliminar' subasta.pk %}" class="btn btn--danger btn--sm">✕</a></div>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+      <div style="display:flex;justify-content:center;gap:var(--space-3);margin-top:var(--space-8);">
+        <button onclick="toggleView('card')" id="btn-card" class="btn btn--ghost btn--sm">⊞ Tarjetas</button>
+        <button onclick="toggleView('table')" id="btn-table" class="btn btn--ghost btn--sm">☰ Tabla</button>
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state__icon">🪙</div>
+        <h3>Aún no has publicado nada</h3>
+        <p>Publica tu primera pieza y deja que el mercado decida su valor real.</p>
+        <a href="{% url 'subastas:crear' %}" class="btn btn--primary btn--lg">Publicar primera pieza</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+function toggleView(v){var table=document.getElementById('table-view');var cards=document.getElementById('card-view');var bc=document.getElementById('btn-card');var bt=document.getElementById('btn-table');if(!table||!cards)return;if(v==='table'){table.style.display='block';cards.style.display='none';bt.className='btn btn--primary btn--sm';bc.className='btn btn--ghost btn--sm';}else{table.style.display='none';cards.style.display='grid';bc.className='btn btn--primary btn--sm';bt.className='btn btn--ghost btn--sm';}}
+(function(){if(window.innerWidth>=768)toggleView('table');else toggleView('card');window.addEventListener('resize',function(){if(window.innerWidth>=768)toggleView('table');else toggleView('card');});})();
+</script>
+{% endblock %}

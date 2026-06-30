@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Eliminar — {{ object.titulo }}{% endblock %}
+{% block content %}
+<section class="page-section">
+  <div class="container container--narrow">
+    <div class="form-card" style="text-align:center;">
+      <div style="font-size:3.5rem;margin-bottom:var(--space-5);">⚠️</div>
+      <h1 style="font-family:var(--font-display);font-size:var(--text-xl);font-weight:800;letter-spacing:-0.02em;margin-bottom:var(--space-4);">¿Eliminar esta subasta?</h1>
+      <p style="color:var(--color-text-muted);margin-bottom:var(--space-2);max-width:42ch;margin-inline:auto;">Estás a punto de eliminar <strong style="color:var(--color-text);">{{ object.titulo }}</strong>.</p>
+      <p style="color:var(--color-error);font-size:var(--text-sm);margin-bottom:var(--space-10);">Esta acción es irreversible. Se eliminarán {{ object.total_ofertas }} oferta{{ object.total_ofertas|pluralize:"s" }} asociada{{ object.total_ofertas|pluralize:"s" }}.</p>
+      <form method="post" style="display:flex;gap:var(--space-4);justify-content:center;flex-wrap:wrap;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn--danger btn--lg">Sí, eliminar definitivamente</button>
+        <a href="{% url 'subastas:detalle' object.pk %}" class="btn btn--ghost btn--lg" style="border:1px solid var(--color-border);">Cancelar</a>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

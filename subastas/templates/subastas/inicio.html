@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Subastas Activas{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <span class="hero__tagline">🔨 Casa de Subastas en Línea</span>
+    <h1 class="hero__title">Piezas únicas esperan<br/><span>tu oferta</span></h1>
+    <p class="hero__subtitle">Antigüedades, coleccionables y objetos de valor. Pujas en tiempo real, precio justo.</p>
+    <div class="hero__actions">
+      {% if user.is_authenticated %}
+        <a href="{% url 'subastas:crear' %}" class="btn btn--primary btn--lg">+ Publicar pieza</a>
+        <a href="{% url 'subastas:mis_subastas' %}" class="btn btn--ghost btn--lg">Mis subastas</a>
+      {% else %}
+        <a href="{% url 'subastas:registro' %}" class="btn btn--primary btn--lg">Comenzar gratis</a>
+        <a href="{% url 'subastas:login' %}" class="btn btn--ghost btn--lg">Ingresar</a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<section class="page-section">
+  <div class="container">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);margin-bottom:var(--space-8);">
+      <h2 style="font-family:var(--font-display);font-size:var(--text-xl);font-weight:800;letter-spacing:-0.02em;">Subastas activas</h2>
+      <span style="font-size:var(--text-sm);color:var(--color-text-faint);">{{ total_subastas|default:"0" }} disponible{{ total_subastas|pluralize:"s" }}</span>
+    </div>
+    {% if subastas %}
+      <div class="auction-grid">
+        {% for subasta in subastas %}
+          <article class="auction-card fade-in-up" style="opacity:0;">
+            <a href="{% url 'subastas:detalle' subasta.pk %}" style="display:contents;text-decoration:none;" aria-label="Ver {{ subasta.titulo }}">
+              <div class="auction-card__image">
+                {% if subasta.imagen %}
+                  <img src="{{ subasta.imagen.url }}" alt="{{ subasta.titulo }}" loading="lazy" width="400" height="300" />
+                {% else %}
+                  <div class="auction-card__placeholder"></div>
+                {% endif %}
+                <span class="auction-card__status">En vivo</span>
+                <span class="auction-card__badge">{{ subasta.total_ofertas }} oferta{{ subasta.total_ofertas|pluralize:"s" }}</span>
+              </div>
+            </a>
+            <div class="auction-card__body">
+              <h3 class="auction-card__title">{{ subasta.titulo }}</h3>
+              <p class="auction-card__desc">{{ subasta.descripcion }}</p>
+              <div class="auction-card__footer">
+                <div>
+                  <div class="auction-card__price-label">Precio actual</div>
+                  <div class="auction-card__price">${{ subasta.precio_actual }}</div>
+                </div>
+                <a href="{% url 'subastas:detalle' subasta.pk %}" class="btn btn--primary btn--sm">Ofertar →</a>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+      {% if is_paginated %}
+        <nav class="pagination" aria-label="Páginas">
+          {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}">‹</a>{% endif %}
+          {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}<span class="current">{{ num }}</span>
+            {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}<a href="?page={{ num }}">{{ num }}</a>{% endif %}
+          {% endfor %}
+          {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}">›</a>{% endif %}
+        </nav>
+      {% endif %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state__icon">🔍</div>
+        <h3>No hay subastas activas</h3>
+        <p>Sé el primero en publicar una pieza.</p>
+        {% if user.is_authenticated %}<a href="{% url 'subastas:crear' %}" class="btn btn--primary">Publicar ahora</a>
+        {% else %}<a href="{% url 'subastas:registro' %}" class="btn btn--primary">Registrarse gratis</a>{% endif %}
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

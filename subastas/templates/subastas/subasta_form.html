@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}{% if form.instance.pk %}Editar — {{ form.instance.titulo }}{% else %}Publicar pieza{% endif %}{% endblock %}
+{% block content %}
+<section class="page-section">
+  <div class="container container--narrow">
+    <div style="text-align:center;margin-bottom:var(--space-10);">
+      <span style="font-size:2.5rem;display:block;margin-bottom:var(--space-4);">{% if form.instance.pk %}✏️{% else %}🔨{% endif %}</span>
+      <h1 style="font-family:var(--font-display);font-size:var(--text-xl);font-weight:800;letter-spacing:-0.02em;margin-bottom:var(--space-2);">{% if form.instance.pk %}Editar subasta{% else %}Publicar nueva pieza{% endif %}</h1>
+      <p style="color:var(--color-text-muted);font-size:var(--text-sm);">Completa todos los campos. La fecha de cierre debe ser futura.</p>
+    </div>
+    <div class="form-card">
+      <form method="post" enctype="multipart/form-data" class="form-stack" novalidate>
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="form-group">
+            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<span style="color:var(--color-gold);margin-left:2px;" aria-hidden="true">*</span>{% endif %}</label>
+            {{ field }}
+            {% if field.errors %}{% for error in field.errors %}<span class="form-error">⚠ {{ error }}</span>{% endfor %}{% endif %}
+            {% if field.help_text %}<span style="font-size:var(--text-xs);color:var(--color-text-faint);">{{ field.help_text }}</span>{% endif %}
+          </div>
+          {% if forloop.counter == 2 %}<hr class="divider" />{% endif %}
+        {% endfor %}
+        <div style="display:flex;gap:var(--space-4);padding-top:var(--space-4);flex-wrap:wrap;">
+          <button type="submit" class="btn btn--primary btn--lg" style="flex:1;justify-content:center;">{% if form.instance.pk %}Guardar cambios{% else %}🔨 Publicar pieza{% endif %}</button>
+          <a href="{% if form.instance.pk %}{% url 'subastas:detalle' form.instance.pk %}{% else %}{% url 'subastas:inicio' %}{% endif %}" class="btn btn--ghost btn--lg" style="border:1px solid var(--color-border);">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

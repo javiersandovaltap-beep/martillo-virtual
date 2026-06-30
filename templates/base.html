@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="{% block meta_desc %}MartilloVirtual — Casa de subastas de coleccionables y antigüedades en línea.{% endblock %}" />
+  <title>{% block title %}MartilloVirtual{% endblock %} | Casa de Subastas</title>
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+  <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@300,400,500,700,800&f[]=instrument-sans@400,500,600&display=swap" rel="stylesheet" />
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+<a class="sr-only" href="#main-content">Saltar al contenido</a>
+
+<nav class="navbar" aria-label="Navegación principal">
+  <a href="{% url 'subastas:inicio' %}" class="navbar__brand">
+    <svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <rect x="13" y="2" width="5" height="19" rx="2.5" fill="currentColor"/>
+      <rect x="2" y="21" width="28" height="5" rx="2.5" fill="currentColor" opacity="0.5"/>
+      <rect x="11" y="27" width="10" height="3" rx="1.5" fill="currentColor" opacity="0.3"/>
+    </svg>
+    MartilloVirtual
+  </a>
+
+  <button class="navbar__hamburger" id="hamburger" aria-label="Abrir menú" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+
+  <ul class="navbar__links" id="nav-links" role="list">
+    <li><a href="{% url 'subastas:inicio' %}">Explorar</a></li>
+    {% if user.is_authenticated %}
+      <li><a href="{% url 'subastas:crear' %}">+ Publicar</a></li>
+      <li><a href="{% url 'subastas:mis_subastas' %}">Mis subastas</a></li>
+      <li>
+        <form method="post" action="{% url 'subastas:logout' %}" style="display:contents;">
+          {% csrf_token %}
+          <button type="submit">{{ user.username }} · Salir</button>
+        </form>
+      </li>
+    {% else %}
+      <li><a href="{% url 'subastas:login' %}">Ingresar</a></li>
+      <li><a href="{% url 'subastas:registro' %}" class="navbar__cta">Registrarse</a></li>
+    {% endif %}
+    <li>
+      <button class="theme-toggle" data-theme-toggle aria-label="Cambiar tema">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+    </li>
+  </ul>
+</nav>
+
+{% if messages %}
+<div style="max-width:var(--content-wide);margin:var(--space-4) auto 0;padding-inline:clamp(var(--space-4),4vw,var(--space-12));">
+  {% for msg in messages %}
+    <div class="alert alert--{% if msg.tags == 'error' %}error{% elif msg.tags == 'success' %}success{% elif msg.tags == 'warning' %}warning{% else %}info{% endif %}" role="alert" style="margin-bottom:var(--space-2);">
+      {{ msg }}
+    </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<main id="main-content">{% block content %}{% endblock %}</main>
+
+<footer class="footer">
+  <div class="footer__inner">
+    <span class="footer__brand">MartilloVirtual</span>
+    <span class="footer__copy">© {% now "Y" %} · Portafolio Django</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var r=document.documentElement;
+  var d=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+  r.setAttribute('data-theme',d);
+  var t=document.querySelector('[data-theme-toggle]');
+  function setIcon(m){if(!t)return;t.innerHTML=m==='dark'?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';}
+  setIcon(d);
+  if(t){t.addEventListener('click',function(){d=d==='dark'?'light':'dark';r.setAttribute('data-theme',d);setIcon(d);});}
+  var h=document.getElementById('hamburger');var n=document.getElementById('nav-links');
+  if(h&&n){h.addEventListener('click',function(){var o=n.classList.toggle('is-open');h.setAttribute('aria-expanded',o);});
+  document.addEventListener('click',function(e){if(n.classList.contains('is-open')&&!h.contains(e.target)&&!n.contains(e.target)){n.classList.remove('is-open');h.setAttribute('aria-expanded','false');}});}
+  document.querySelectorAll('.fade-in-up').forEach(function(el,i){el.style.animationDelay=(i*80)+'ms';});
+})();
+</script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

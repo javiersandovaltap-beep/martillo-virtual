@@ -1,0 +1,2 @@
+{% extends "base.html" %}{% block title %}404{% endblock %}
+{% block content %}<section class="page-section"><div class="container"><div class="empty-state"><div class="empty-state__icon">🔍</div><h3>Página no encontrada</h3><p>La pieza que buscas no existe o fue retirada.</p><a href="{% url 'subastas:inicio' %}" class="btn btn--primary btn--lg">Volver al inicio</a></div></div></section>{% endblock %}

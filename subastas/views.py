@@ -1,0 +1,170 @@
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.shortcuts import redirect, render, get_object_or_404
+from django.urls import reverse_lazy
+from django.http import HttpResponseForbidden
+
+from .models import Subasta, Oferta
+from .forms import SubastaForm, OfertaForm, RegistroForm, LoginForm
+
+
+# ─── Listado público ─────────────────────────────────────────────────────────
+class InicioView(ListView):
+    model = Subasta
+    template_name = "subastas/inicio.html"
+    context_object_name = "subastas"
+    paginate_by = 9
+
+    def get_queryset(self):
+        return Subasta.objects.filter(estado="activa").order_by("-creado_en")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["total_subastas"] = self.get_queryset().count()
+        return ctx
+
+
+# ─── Detalle ─────────────────────────────────────────────────────────────────
+class DetalleView(DetailView):
+    model = Subasta
+    template_name = "subastas/subasta_detail.html"
+    context_object_name = "subasta"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["ofertas"] = self.object.ofertas.order_by("-monto")[:20]
+        ctx["form_oferta"] = OfertaForm(subasta=self.object)
+        return ctx
+
+
+# ─── CRUD ─────────────────────────────────────────────────────────────────────
+class CrearSubastaView(LoginRequiredMixin, CreateView):
+    model = Subasta
+    form_class = SubastaForm
+    template_name = "subastas/subasta_form.html"
+    login_url = "subastas:login"
+
+    def form_valid(self, form):
+        form.instance.vendedor = self.request.user
+        messages.success(self.request, "✅ Subasta publicada exitosamente.")
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy("subastas:detalle", kwargs={"pk": self.object.pk})
+
+
+class EditarSubastaView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Subasta
+    form_class = SubastaForm
+    template_name = "subastas/subasta_form.html"
+    login_url = "subastas:login"
+
+    def test_func(self):
+        return self.get_object().vendedor == self.request.user
+
+    def form_valid(self, form):
+        messages.success(self.request, "✅ Cambios guardados.")
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy("subastas:detalle", kwargs={"pk": self.object.pk})
+
+
+class EliminarSubastaView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Subasta
+    template_name = "subastas/subasta_confirm_delete.html"
+    success_url = reverse_lazy("subastas:mis_subastas")
+    login_url = "subastas:login"
+
+    def test_func(self):
+        return self.get_object().vendedor == self.request.user
+
+    def form_valid(self, form):
+        messages.success(self.request, "🗑 Subasta eliminada.")
+        return super().form_valid(form)
+
+
+# ─── Ofertar ─────────────────────────────────────────────────────────────────
+@login_required(login_url="subastas:login")
+def ofertar(request, pk):
+    subasta = get_object_or_404(Subasta, pk=pk)
+
+    if not subasta.esta_activa:
+        messages.error(request, "Esta subasta ya no está activa.")
+        return redirect("subastas:detalle", pk=pk)
+
+    if subasta.vendedor == request.user:
+        messages.warning(request, "No puedes ofertar en tu propia subasta.")
+        return redirect("subastas:detalle", pk=pk)
+
+    form = OfertaForm(subasta=subasta, data=request.POST)
+    if form.is_valid():
+        oferta = form.save(commit=False)
+        oferta.subasta = subasta
+        oferta.ofertante = request.user
+        oferta.save()
+        messages.success(request, f"🔨 ¡Oferta de ${oferta.monto} registrada!")
+    else:
+        for error in form.errors.values():
+            messages.error(request, error.as_text())
+
+    return redirect("subastas:detalle", pk=pk)
+
+
+# ─── Mis subastas ─────────────────────────────────────────────────────────────
+class MisSubastasView(LoginRequiredMixin, ListView):
+    model = Subasta
+    template_name = "subastas/mis_subastas.html"
+    context_object_name = "subastas"
+    login_url = "subastas:login"
+
+    def get_queryset(self):
+        return Subasta.objects.filter(vendedor=self.request.user).order_by("-creado_en")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        qs = self.get_queryset()
+        ctx["total"]   = qs.count()
+        ctx["activas"] = qs.filter(estado="activa").count()
+        ctx["cerradas"] = qs.filter(estado="cerrada").count()
+        ctx["total_ofertas_recibidas"] = sum(s.total_ofertas for s in qs)
+        return ctx
+
+
+# ─── Auth ─────────────────────────────────────────────────────────────────────
+def registro(request):
+    form = RegistroForm(request.POST or None)
+    if form.is_valid():
+        user = form.save()
+        login(request, user)
+        messages.success(request, f"¡Bienvenido, {user.username}!")
+        return redirect("subastas:inicio")
+    return render(request, "subastas/registro.html", {"form": form})
+
+
+def login_view(request):
+    form = LoginForm(request=request, data=request.POST or None)
+    if form.is_valid():
+        user = form.get_user()
+        login(request, user)
+        next_url = request.GET.get("next", "subastas:inicio")
+        return redirect(next_url)
+    return render(request, "subastas/login.html", {"form": form})
+
+
+def logout_view(request):
+    if request.method == "POST":
+        logout(request)
+        messages.info(request, "Sesión cerrada correctamente.")
+    return redirect("subastas:inicio")
+
+
+# ─── Error handlers ───────────────────────────────────────────────────────────
+def handler404(request, exception=None):
+    return render(request, "subastas/404.html", status=404)
+
+def handler500(request):
+    return render(request, "subastas/500.html", status=500)

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Ingresar{% endblock %}
+{% block content %}
+<section class="page-section">
+  <div class="container container--narrow">
+    <div style="text-align:center;margin-bottom:var(--space-10);">
+      <div style="width:64px;height:64px;border-radius:50%;background:var(--color-gold-subtle);display:flex;align-items:center;justify-content:center;margin:0 auto var(--space-5);border:1px solid rgba(196,127,23,0.2);">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-gold)" stroke-width="2" stroke-linecap="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      </div>
+      <h1 style="font-family:var(--font-display);font-size:var(--text-xl);font-weight:800;letter-spacing:-0.02em;margin-bottom:var(--space-2);">Bienvenido de nuevo</h1>
+      <p style="color:var(--color-text-muted);font-size:var(--text-sm);">Ingresa para ofertar y gestionar tus subastas.</p>
+    </div>
+    <div class="form-card">
+      <form method="post" class="form-stack" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert alert--error">{{ form.non_field_errors }}</div>{% endif %}
+        {% for field in form %}
+          <div class="form-group">
+            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}{% for error in field.errors %}<span class="form-error">⚠ {{ error }}</span>{% endfor %}{% endif %}
+          </div>
+        {% endfor %}
+        <button type="submit" class="btn btn--primary btn--lg" style="width:100%;justify-content:center;margin-top:var(--space-2);">Ingresar →</button>
+      </form>
+    </div>
+    <p style="text-align:center;margin-top:var(--space-6);font-size:var(--text-sm);color:var(--color-text-muted);">¿No tienes cuenta? <a href="{% url 'subastas:registro' %}" style="color:var(--color-gold);font-weight:600;text-decoration:none;">Regístrate gratis</a></p>
+  </div>
+</section>
+{% endblock %}

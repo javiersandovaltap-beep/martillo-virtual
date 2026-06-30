@@ -166,10 +166,10 @@ def login_view(request):
     return render(request, "subastas/login.html", {"form": form})
 
 
+@require_POST
 def logout_view(request):
-    if request.method == "POST":
-        logout(request)
-        messages.info(request, "Sesión cerrada correctamente.")
+    logout(request)
+    messages.info(request, "Sesión cerrada correctamente.")
     return redirect("subastas:inicio")
 
 

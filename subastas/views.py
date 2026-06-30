@@ -8,6 +8,7 @@ from django.urls import reverse_lazy, reverse
 from django.http import HttpResponseForbidden
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
+from django.db import transaction
 
 from .models import Subasta, Oferta
 from .forms import SubastaForm, OfertaForm, RegistroForm, LoginForm
@@ -93,26 +94,39 @@ class EliminarSubastaView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 @login_required(login_url="subastas:login")
 @require_POST
 def ofertar(request, pk):
-    subasta = get_object_or_404(Subasta, pk=pk)
+    # Use atomic + select_for_update to prevent race conditions:
+    # two users offering the same amount simultaneously would both pass
+    # validation without the row lock.
+    with transaction.atomic():
+        # select_for_update locks the Subasta row until transaction commits.
+        # Concurrent transactions block here until the first one finishes.
+        subasta = get_object_or_404(
+            Subasta.objects.select_for_update(),
+            pk=pk,
+        )
 
-    if not subasta.esta_activa:
-        messages.error(request, "Esta subasta ya no está activa.")
-        return redirect("subastas:detalle", pk=pk)
+        if not subasta.esta_activa:
+            messages.error(request, "Esta subasta ya no está activa.")
+            # Redirect happens AFTER the transaction commits (context manager exit)
+            # to avoid side effects inside atomic block.
+            # But we can return inside the with block safely -- Django will commit
+            # on context exit if no exception was raised.
+            return redirect("subastas:detalle", pk=pk)
 
-    if subasta.vendedor == request.user:
-        messages.warning(request, "No puedes ofertar en tu propia subasta.")
-        return redirect("subastas:detalle", pk=pk)
+        if subasta.vendedor == request.user:
+            messages.warning(request, "No puedes ofertar en tu propia subasta.")
+            return redirect("subastas:detalle", pk=pk)
 
-    form = OfertaForm(subasta=subasta, data=request.POST)
-    if form.is_valid():
-        oferta = form.save(commit=False)
-        oferta.subasta = subasta
-        oferta.ofertante = request.user
-        oferta.save()
-        messages.success(request, f"🔨 ¡Oferta de ${oferta.monto} registrada!")
-    else:
-        for error in form.errors.values():
-            messages.error(request, error.as_text())
+        form = OfertaForm(subasta=subasta, data=request.POST)
+        if form.is_valid():
+            oferta = form.save(commit=False)
+            oferta.subasta = subasta
+            oferta.ofertante = request.user
+            oferta.save()
+            messages.success(request, f"🔨 ¡Oferta de ${oferta.monto} registrada!")
+        else:
+            for error in form.errors.values():
+                messages.error(request, error.as_text())
 
     return redirect("subastas:detalle", pk=pk)
 

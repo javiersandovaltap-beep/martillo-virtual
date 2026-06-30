@@ -72,6 +72,8 @@
 
 - L21: git show --stat HEAD can show duplicated files in the diff (presentation artifact). The final tree has NO duplicates. Always validate with git ls-tree -r HEAD --name-only | sort | uniq -c | awk '$1 > 1' before assuming a broken commit
 - L22: NIM (Minimax M2.7) can return 'Decode wall clock timeout after 600s' during complex tasks. Claude Code appears frozen for up to 10 minutes. A user nudge (e.g. 'Finish the task') can resume execution. The timeout is transitory (L02) and does not corrupt partial work. If it recurs, consider splitting the prompt into smaller subtasks.
+- L23: Layer 1 (python manage.py check) does NOT validate security logic. A wrong security fix (e.g., allowed_hosts=None defeats url_has_allowed_host_and_scheme) can pass Layer 1. Always verify security fixes with actual attack vector tests (Layer 3 with malicious input, or dedicated security tests in Phase 4). Do not trust Layer 1 alone for security fixes.
+- L24: Git Bash on Windows mangles Windows native command flags. /PID and /F in taskkill get converted to paths (C:/Program Files/Git/PID). Use //PID and //F (double slash) or MSYS_NO_PATHCONV=1 prefix. Specific case of L15 for Windows native commands.
 
 ## Decisions log
 

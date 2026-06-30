@@ -3,7 +3,7 @@ import dj_database_url
 from .base import *  # noqa
 
 DEBUG = False
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
+ALLOWED_HOSTS = [host.strip() for host in os.environ.get("ALLOWED_HOSTS", "").split(",") if host.strip()]
 
 DATABASES = {
     "default": dj_database_url.config(

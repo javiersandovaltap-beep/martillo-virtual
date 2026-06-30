@@ -26,6 +26,10 @@ class Subasta(models.Model):
         ordering = ["-creado_en"]
         verbose_name = "subasta"
         verbose_name_plural = "subastas"
+        indexes = [
+            models.Index(fields=["estado", "-creado_en"], name="subasta_estado_created_idx"),
+            models.Index(fields=["fecha_cierre"], name="subasta_cierre_idx"),
+        ]
 
     def __str__(self):
         return self.titulo
@@ -54,6 +58,9 @@ class Oferta(models.Model):
         ordering = ["-monto", "-creado_en"]
         verbose_name = "oferta"
         verbose_name_plural = "ofertas"
+        indexes = [
+            models.Index(fields=["-creado_en"], name="oferta_created_idx"),
+        ]
         constraints = [
             models.UniqueConstraint(
                 fields=["subasta", "ofertante", "monto"],

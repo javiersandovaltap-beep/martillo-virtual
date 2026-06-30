@@ -5,11 +5,11 @@
 
 ## Current state
 
-- Phase: 1 (Critical blockers + Security audit) - completed
-- Last commit: docs: update SESSION_STATE.md for Phase 1 closure
-- Last tag: v0.2-stable (pending)
+- Phase: 2 (Workflow discipline + Config split) - completed
+- Last commit: docs: update SESSION_STATE.md for Phase 2 closure
+- Last tag: v0.3-stable (pending)
 - Blockers: none
-- Next step: Phase 2 (Workflow discipline + Config split)
+- Next step: Phase 3 (Estabilizacion: N+1, UX consistency, indexes, subasta closing)
 
 ## Project context
 
@@ -45,6 +45,15 @@
 - fix(B09): add @require_POST to logout_view, remove internal method check (2c962cb) - verified with 4/4 method validation tests
 - fix(B02): wrap ofertar in transaction.atomic + select_for_update (eb45817) - verified with 2/2 race condition tests
 - docs: L22 (NIM timeout recovery), L23 (Layer 1 does not validate security), L24 (Git Bash + Windows native commands), L25 (Django test client HTTP_HOST)
+
+### Phase 2 - Workflow discipline + Config split (v0.3-stable)
+- fix(C08): STATICFILES_STORAGE conditional dev vs prod (e3fabee) - dev=Compressed, prod=CompressedManifest
+- refactor(D03): remove unused crispy_forms dependencies (2c01960) - deps + INSTALLED_APPS + settings cleaned
+- chore: remove dead import reverse from views.py (d3f791a) - leftover from B07 fix
+- chore: add trailing newline to production.py (3ab3eca) - POSIX compliance
+- docs(C07): expand .env.example with all env vars and comments (8505173) - comments + 5 KEY=value assignments
+- No new lessons (mechanical phase)
+
 
 
 ## Lessons
@@ -101,6 +110,8 @@
 - D09: Rate limiting with django-ratelimit in Phase 4
 - D10: Automatic closing via management command + cron in Render (Phase 3)
 - D17: English for all .md editable by Claude Code (L01). README, DEPLOY.md, POSTMORTEM.md remain in Spanish (human consumption).
+- D18: crispy_forms removed (was installed but never used in templates, custom CSS handles styling)
+- D19: .env.example keeps KEY=value assignments (not just comments) for copy-paste usability
 
 ## Open questions
 
@@ -140,4 +151,4 @@
 | C02 | martillo_v3/ stale | Phase 0 | removed |
 | C04 | No git init | Phase 0 | fixed |
 | C06 | No tests | Phase 4 | pending |
-| C08 | ManifestStaticFilesStorage in dev | Phase 2 | pending |
+| C08 | ManifestStaticFilesStorage in dev | Phase 2 | fixed (e3fabee) |

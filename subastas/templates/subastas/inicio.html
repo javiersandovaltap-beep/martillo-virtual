@@ -35,7 +35,7 @@
                 {% else %}
                   <div class="auction-card__placeholder"></div>
                 {% endif %}
-                <span class="auction-card__status">En vivo</span>
+                {% if subasta.esta_activa %}<span class="auction-card__status">En vivo</span>{% endif %}
                 <span class="auction-card__badge">{{ subasta.total_ofertas }} oferta{{ subasta.total_ofertas|pluralize:"s" }}</span>
               </div>
             </a>

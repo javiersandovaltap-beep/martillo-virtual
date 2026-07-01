@@ -39,11 +39,17 @@ class Subasta(models.Model):
 
     @property
     def precio_actual(self):
+        # If we have an annotated value, use it
+        if hasattr(self, '_precio_actual'):
+            return self._precio_actual
         mejor = self.ofertas.order_by("-monto").first()
         return mejor.monto if mejor else self.precio_inicial
 
     @property
     def total_ofertas(self):
+        # If we have an annotated value, use it
+        if hasattr(self, '_total_ofertas'):
+            return self._total_ofertas
         return self.ofertas.count()
 
 

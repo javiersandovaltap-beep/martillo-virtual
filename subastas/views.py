@@ -10,6 +10,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from django.db import transaction, models
 from django.db.models import Q
+from django.utils import timezone
 
 from .models import Subasta, Oferta
 from .forms import SubastaForm, OfertaForm, RegistroForm, LoginForm
@@ -191,10 +192,11 @@ class MisSubastasView(LoginRequiredMixin, ListView):
         qs = self.object_list
 
         # Aggregate all stats in ONE query using the annotated _total_ofertas
+        now = timezone.now()
         stats = qs.aggregate(
             total=Count('id'),
-            activas=Count('id', filter=Q(estado='activa')),
-            cerradas=Count('id', filter=Q(estado='cerrada')),
+            activas=Count('id', filter=Q(estado='activa', fecha_cierre__gt=now)),
+            cerradas=Count('id', filter=Q(estado='cerrada') | Q(fecha_cierre__lte=now)),
             total_ofertas_recibidas=Coalesce(Sum('_total_ofertas', output_field=IntegerField()), 0),
         )
         ctx.update(stats)

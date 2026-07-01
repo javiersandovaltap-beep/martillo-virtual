@@ -9,6 +9,7 @@ from django.http import HttpResponseForbidden
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from django.db import transaction, models
+from django.db.models import Q
 
 from .models import Subasta, Oferta
 from .forms import SubastaForm, OfertaForm, RegistroForm, LoginForm
@@ -163,15 +164,40 @@ class MisSubastasView(LoginRequiredMixin, ListView):
     login_url = "subastas:login"
 
     def get_queryset(self):
-        return Subasta.objects.filter(vendedor=self.request.user).order_by("-creado_en")
+        from django.db.models import Count, Max, F, OuterRef, Subquery
+        from django.db.models.functions import Coalesce
+
+        # Same annotation pattern as InicioView (B03 fix, L27)
+        total_ofertas_subquery = Oferta.objects.filter(subasta=OuterRef('pk')).order_by().values('subasta').annotate(count=Count('id')).values('count')
+        precio_actual_subquery = Oferta.objects.filter(subasta=OuterRef('pk')).order_by('-monto').values('monto')[:1]
+
+        return (
+            Subasta.objects
+            .filter(vendedor=self.request.user)
+            .order_by("-creado_en")
+            .annotate(
+                _total_ofertas=Coalesce(Subquery(total_ofertas_subquery), 0),
+                _precio_actual=Coalesce(Subquery(precio_actual_subquery), F('precio_inicial')),
+            )
+        )
 
     def get_context_data(self, **kwargs):
+        from django.db.models import Count, Sum, IntegerField
+        from django.db.models.functions import Coalesce
+
         ctx = super().get_context_data(**kwargs)
-        qs = self.get_queryset()
-        ctx["total"]   = qs.count()
-        ctx["activas"] = qs.filter(estado="activa").count()
-        ctx["cerradas"] = qs.filter(estado="cerrada").count()
-        ctx["total_ofertas_recibidas"] = sum(s.total_ofertas for s in qs)
+        # Use the already-annotated queryset (self.object_list) for stats
+        # to avoid re-running queries.
+        qs = self.object_list
+
+        # Aggregate all stats in ONE query using the annotated _total_ofertas
+        stats = qs.aggregate(
+            total=Count('id'),
+            activas=Count('id', filter=Q(estado='activa')),
+            cerradas=Count('id', filter=Q(estado='cerrada')),
+            total_ofertas_recibidas=Coalesce(Sum('_total_ofertas', output_field=IntegerField()), 0),
+        )
+        ctx.update(stats)
         return ctx
 
 

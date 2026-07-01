@@ -18,7 +18,7 @@
             {% if field.errors %}{% for error in field.errors %}<span class="form-error">⚠ {{ error }}</span>{% endfor %}{% endif %}
             {% if field.help_text %}<span style="font-size:var(--text-xs);color:var(--color-text-faint);">{{ field.help_text }}</span>{% endif %}
           </div>
-          {% if forloop.counter == 2 %}<hr class="divider" />{% endif %}
+          {% if field.name == "precio_inicial" %}<hr class="divider" />{% endif %}
         {% endfor %}
         <div style="display:flex;gap:var(--space-4);padding-top:var(--space-4);flex-wrap:wrap;">
           <button type="submit" class="btn btn--primary btn--lg" style="flex:1;justify-content:center;">{% if form.instance.pk %}Guardar cambios{% else %}🔨 Publicar pieza{% endif %}</button>

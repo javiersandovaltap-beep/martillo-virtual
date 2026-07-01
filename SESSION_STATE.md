@@ -5,11 +5,11 @@
 
 ## Current state
 
-- Phase: 2 (Workflow discipline + Config split) - completed
-- Last commit: docs: update SESSION_STATE.md for Phase 2 closure
-- Last tag: v0.3-stable (pending)
+- Phase: 3 (Estabilizacion) - completed
+- Last commit: docs: update SESSION_STATE.md for Phase 3 closure
+- Last tag: v0.4-stable (pending)
 - Blockers: none
-- Next step: Phase 3 (Estabilizacion: N+1, UX consistency, indexes, subasta closing)
+- Next step: Phase 4 (Hardening: tests, coverage 80%+, rate limiting)
 
 ## Project context
 
@@ -53,6 +53,23 @@
 - chore: add trailing newline to production.py (3ab3eca) - POSIX compliance
 - docs(C07): expand .env.example with all env vars and comments (8505173) - comments + 5 KEY=value assignments
 - No new lessons (mechanical phase)
+
+### Phase 3 - Estabilizacion (v0.4-stable)
+- perf(D01,D02): add database indexes for Subasta and Oferta (bf86802) - 3 indexes
+- refactor(B10): eliminate redundant fecha_inicio field (8481ec2) - migration 0004, template updated
+- perf(B05): InicioView reuses paginator.count instead of separate COUNT (87a0ed9) - 2 -> 1 COUNT on subastas_subasta
+- perf(B03): annotate InicioView with subqueries to eliminate N+1 (8c1e639) - 20 -> 2 total queries
+- docs: add L27 (@property shadows __dict__) and L28 (query filter false positives) (14aa7ea)
+- perf(B04): annotate MisSubastasView + aggregate stats in 1 query (279370f) - ~12 -> 4 total queries
+- fix(F01): badge 'En vivo' only when esta_activa is true (387cd9b)
+- fix(F02): stats counter uses esta_activa-consistent logic (d48605e) - Q(estado + fecha_cierre)
+- fix(F03): divider based on field name, not forloop.counter (c4af8fd)
+- fix(F04): remove duplicate @import from CSS (1970ba0)
+- fix(B06): remove dead form_oferta from context, align HTML min with server validation (2ab50c7)
+- feat: add cerrar_subastas management command (a59136e) - D10, ready for cron in Fase 5
+- docs: update django-frontend.md with Phase 3 fix statuses (70e3468)
+- docs: L29 (free tier LLM rate limits) - to be added
+
 
 
 
@@ -98,6 +115,7 @@
 - L25: Django test client uses 'testserver' as default HTTP_HOST. In dev settings with ALLOWED_HOSTS = ['localhost', '127.0.0.1'] (no 'testserver'), ALL test client requests fail with DisallowedHost 400 BEFORE reaching the view. False positive: test scripts that only check 'evil.com not in Location' will PASS even though the view never ran. Fix: use Client(HTTP_HOST='localhost') in test scripts, or add 'testserver' to ALLOWED_HOSTS in test settings. Specific case of L23 (Layer 1 doesn't validate security) applied to test infrastructure.
 - L27: @property is a Python data descriptor and takes precedence over instance __dict__. Annotating a queryset with the SAME name as a property does NOT shadow the property -- the property is still called. To use annotations in list views while keeping properties for single-instance access, use different annotation names (e.g., _total_ofertas) and add hasattr(self, '_total_ofertas') checks at the start of properties to use the annotated value when available.
 - L28: Filtering queries by substring ('COUNT' in sql and 'subastas_oferta' in sql) gives false positives when a main SELECT has COUNT subqueries embedded. Correct metric for N+1 detection: total query count before/after fix. If total drops from N to 2-3, the fix worked. To filter pure COUNT queries, use q['sql'].lstrip().upper().startswith('SELECT COUNT') which matches only queries that START with SELECT COUNT, not those with COUNT embedded.
+- L29: Free tier LLM APIs (NVIDIA NIM, free-claude-code-live proxy) have hard daily/hourly rate limits (e.g., 32 req/worker). On a project of this size (~30 commits, multiple validation rounds), rate limits get exhausted before completing the work. Strategy: when rate limits are hit, switch to deterministic bash/python scripts that don't depend on LLM APIs. Document the limit pattern in POSTMORTEM.md so future projects plan LLM usage budget. The 3-model experiment must be re-scoped: instead of 'compare 3 models on 5 task types', it becomes 'compare models where available, document rate limit impact, and rely on scripts for the rest'.
 
 ## Decisions log
 
@@ -114,6 +132,9 @@
 - D17: English for all .md editable by Claude Code (L01). README, DEPLOY.md, POSTMORTEM.md remain in Spanish (human consumption).
 - D18: crispy_forms removed (was installed but never used in templates, custom CSS handles styling)
 - D19: .env.example keeps KEY=value assignments (not just comments) for copy-paste usability
+- D22: eliminate fecha_inicio (redundant with creado_en, both auto_now_add) - keep creado_en
+- D23: B06 fix uses hardcoded HTML (not form rendering) to preserve design system styling
+- D24: cerrar_subastas via management command + cron (D10 confirmed, not celery/signal)
 
 ## Open questions
 
@@ -125,20 +146,20 @@
 |----|-------------|-------|--------|
 | B01 | (merged into B08) | Phase 1 | closed |
 | B02 | Race condition in ofertar() | Phase 1 | fixed (eb45817) |
-| B03 | N+1 in precio_actual/total_ofertas | Phase 3 | pending |
-| B04 | N+1 in MisSubastasView | Phase 3 | pending |
-| B05 | InicioView executes queryset 2x | Phase 3 | pending |
-| B06 | form_oferta in context but not rendered | Phase 3 | pending |
+| B03 | N+1 in precio_actual/total_ofertas | Phase 3 | fixed (8c1e639) |
+| B04 | N+1 in MisSubastasView | Phase 3 | fixed (279370f) |
+| B05 | InicioView executes queryset 2x | Phase 3 | fixed (87a0ed9) |
+| B06 | form_oferta in context but not rendered | Phase 3 | fixed (2ab50c7) |
 | B07 | Open redirect in login_view | Phase 1 | fixed (8bf3758) |
 | B08 | seed_data.py broken (ESTADO_ACTIVA) | Phase 0 | fixed |
 | B09 | Logout without @require_POST | Phase 1 | fixed (2c962cb) |
-| B10 | fecha_inicio and creado_en redundant | Phase 3 | pending |
+| B10 | fecha_inicio and creado_en redundant | Phase 3 | fixed (8481ec2) |
 | F01 | "En vivo" badge unconditional | Phase 3 | pending |
-| F02 | Stats counter inconsistent with badge | Phase 3 | pending |
-| F03 | Divider depends on field order | Phase 3 | pending |
-| F04 | CSS @import duplicates HTML link | Phase 3 | pending |
-| D01 | No index on Oferta.creado_en | Phase 3 | pending |
-| D02 | No index on Subasta.estado, fecha_cierre | Phase 3 | pending |
+| F02 | Stats counter inconsistent with badge | Phase 3 | fixed (d48605e) |
+| F03 | Divider depends on field order | Phase 3 | fixed (c4af8fd) |
+| F04 | CSS @import duplicates HTML link | Phase 3 | fixed (1970ba0) |
+| D01 | No index on Oferta.creado_en | Phase 3 | fixed (bf86802) |
+| D02 | No index on Subasta.estado, fecha_cierre | Phase 3 | fixed (bf86802) |
 | D04 | Migrations squashable | Phase 5 | pending |
 | S01 | SECRET_KEY exposed in zip | Phase 0 | rotated |
 | S02 | SECRET_KEY without graceful fallback | Phase 1 | fixed (3034df4) |

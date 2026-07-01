@@ -65,7 +65,8 @@ class DetalleView(DetailView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["ofertas"] = self.object.ofertas.order_by("-monto")[:20]
-        ctx["form_oferta"] = OfertaForm(subasta=self.object)
+        # form_oferta removed: template uses hardcoded HTML input with design system styling.
+        # OfertaForm is still used in ofertar() view for server-side validation.
         return ctx
 
 

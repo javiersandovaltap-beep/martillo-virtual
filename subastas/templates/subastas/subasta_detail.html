@@ -67,8 +67,8 @@
                   {% csrf_token %}
                   <div class="form-group">
                     <label class="form-label" for="id_monto">Tu oferta</label>
-                    <input type="number" name="monto" id="id_monto" min="{{ subasta.precio_actual }}" step="1" placeholder="Mínimo ${{ subasta.precio_actual }}" required style="font-size:var(--text-lg);font-weight:700;font-family:var(--font-display);" />
-                    <span style="font-size:var(--text-xs);color:var(--color-text-faint);">Debe superar la oferta actual</span>
+                    <input type="number" name="monto" id="id_monto" min="{{ subasta.precio_actual|add:'1' }}" step="1" placeholder="Mínimo ${{ subasta.precio_actual|add:'1' }}" required style="font-size:var(--text-lg);font-weight:700;font-family:var(--font-display);" />
+                    <span style="font-size:var(--text-xs);color:var(--color-text-faint);">Debe superar ${{ subasta.precio_actual }} (mínimo ${{ subasta.precio_actual|add:'1' }})</span>
                   </div>
                   <button type="submit" class="btn btn--primary btn--lg btn--pulse" style="width:100%;justify-content:center;">🔨 Hacer oferta</button>
                 </form>

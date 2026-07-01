@@ -48,15 +48,20 @@ You can read and edit:
 - Security audit (XSS, CSRF) -> django-security
 - Docs (README) -> django-docs
 
-## Known frontend debt (from analysis)
+## Known frontend debt (updated post-Phase 3 R3.1 + R3.2)
 
-- F01: Badge "En vivo" incondicional in inicio.html:38 (should check esta_activa)
-- F02: Stats counter inconsistent with badge in mis_subastas.html
-- F03: Divider in subasta_form.html:21 depends on field order (forloop.counter == 2)
-- F04: CSS @import duplicates HTML link in style.css:1
-- F05: Inconsistency between inicio.html placeholder (CSS "Sin imagen") and subasta_detail.html placeholder (emoji)
-- F06: JS inline blocks future CSP strict (needs nonces or external .js files)
-- F07: novalidate on all forms disables HTML5 validation
+Status legend: FIXED = closed, PENDING = future phase, OK = no issue
+
+- F01: Badge "En vivo" incondicional -- FIXED (387cd9b, conditional {% if subasta.esta_activa %})
+- F02: Stats counter inconsistent with badge -- FIXED (d48605e, uses Q(estado='activa', fecha_cierre__gt=now))
+- F03: Divider depends on field order -- FIXED (c4af8fd, uses {% if field.name == "precio_inicial" %})
+- F04: CSS @import duplicates HTML link -- FIXED (1970ba0, removed @import from style.css line 1)
+- F05: Inconsistency between inicio.html placeholder (CSS "Sin imagen") and subasta_detail.html placeholder (emoji) -- PENDING Phase 5 (cosmetic, low priority)
+- F06: JS inline blocks future CSP strict -- PENDING Phase 4 (needs nonces or external .js files if CSP enabled)
+- F07: novalidate on all forms disables HTML5 validation -- OK (intentional, server-side validation is source of truth)
+
+Also fixed in Phase 3 (not in original frontend list but related):
+- B06: form_oferta in context but not rendered -- FIXED (2ab50c7, removed dead code, aligned HTML min with server strict validation)
 
 ## Design system reference
 

@@ -56,6 +56,12 @@ class Command(BaseCommand):
             )
             return
 
+        # Capture pks/titulos BEFORE update.
+        # After .update(estado=CERRADA), the queryset re-evaluates with the
+        # original filter (estado=ACTIVA), which no longer matches the updated
+        # rows. So we must capture the audit data before the update.
+        expiradas_info = list(expiradas.values_list("pk", "titulo", "fecha_cierre"))
+
         # Cerrar (update batch, 1 query)
         actualizadas = expiradas.update(estado=Subasta.Estado.CERRADA)
 
@@ -65,13 +71,9 @@ class Command(BaseCommand):
             )
         )
 
-        # Listar las cerradas (audit trail)
-        # Re-query para confirmar (expiradas ya esta filtrado, pero update no
-        # refresca instancias -- hacemos query nueva con los pks)
-        # En realidad, expiradas sigue siendo el queryset pre-update. Iteramos
-        # para mostrar info (no toca DB de nuevo si usamos values_list).
+        # Listar las cerradas (audit trail) using captured data
         self.stdout.write("Subastas cerradas:")
-        for s in expiradas.values_list("pk", "titulo", "fecha_cierre"):
+        for pk, titulo, fecha_cierre in expiradas_info:
             self.stdout.write(
-                f"  - pk={s[0]} titulo='{s[1]}' fecha_cierre={s[2].isoformat()}"
+                f"  - pk={pk} titulo='{titulo}' fecha_cierre={fecha_cierre.isoformat()}"
             )

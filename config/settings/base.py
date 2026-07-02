@@ -77,6 +77,14 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+
+# Silenced checks
+# django-ratelimit E003/W001: LocMemCache is not shared across workers.
+# In dev (1 process) and tests this is fine. In prod (Render, 2 workers),
+# rate limit counters are per-worker (effective limit = N * workers).
+# To fix in prod: use Redis or DatabaseCache (see D28 in ALTERNATIVES.md).
+SILENCED_SYSTEM_CHECKS = ["django_ratelimit.E003", "django_ratelimit.W001"]
+
 LOGIN_URL = "subastas:login"
 LOGIN_REDIRECT_URL = "subastas:inicio"
 LOGOUT_REDIRECT_URL = "subastas:inicio"

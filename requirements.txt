@@ -6,6 +6,7 @@ python-dotenv==1.0.1
 whitenoise==6.8.2
 gunicorn==23.0.0
 Pillow==12.0.0
+django-ratelimit==4.1.0
 # Testing (D08: pytest-django)
 pytest==9.1.1
 pytest-django==4.12.0

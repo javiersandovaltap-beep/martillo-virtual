@@ -10,6 +10,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 from django.db import transaction, models
 from django.db.models import Q
+from django_ratelimit.decorators import ratelimit
 from django.utils import timezone
 
 from .models import Subasta, Oferta
@@ -205,6 +206,7 @@ class MisSubastasView(LoginRequiredMixin, ListView):
 
 
 # ─── Auth ─────────────────────────────────────────────────────────────────────
+@ratelimit(key='ip', rate='3/h', block=True)
 def registro(request):
     form = RegistroForm(request.POST or None)
     if form.is_valid():
@@ -215,6 +217,7 @@ def registro(request):
     return render(request, "subastas/registro.html", {"form": form})
 
 
+@ratelimit(key='ip', rate='5/m', block=True)
 def login_view(request):
     form = LoginForm(request=request, data=request.POST or None)
     if form.is_valid():

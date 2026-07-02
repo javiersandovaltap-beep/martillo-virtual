@@ -37,3 +37,8 @@ Thumbs.db
 
 # Migraciones generadas (conserva __init__.py)
 # subastas/migrations/*.py  ← descomentar si prefieres no versionar migraciones
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/

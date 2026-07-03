@@ -60,6 +60,19 @@ class Subasta(models.Model):
             return self._total_ofertas
         return self.ofertas.count()
 
+    @property
+    def tiene_ganador(self):
+        """True if subasta is cerrada AND has a ganador set."""
+        return self.estado == self.Estado.CERRADA and self.ganador is not None
+
+    @property
+    def monto_ganador(self):
+        """Returns the winning oferta monto, or None if no ganador."""
+        if not self.tiene_ganador:
+            return None
+        mejor = self.ofertas.order_by("-monto", "creado_en").first()
+        return mejor.monto if mejor else None
+
 
 class Oferta(models.Model):
     subasta    = models.ForeignKey(Subasta, on_delete=models.CASCADE, related_name="ofertas")

@@ -1,22 +1,23 @@
 """
 Comando personalizado para cerrar subastas expiradas.
-Uso: python manage.py cerrar_subastas
+Uso:
+  python manage.py cerrar_subastas           # cierra expiradas
+  python manage.py cerrar_subastas --dry-run # preview sin aplicar
 
-Busca subastas con estado='activa' AND fecha_cierre <= now
-y las actualiza a estado='cerrada'.
-
-Diseñado para correr via cron en Render (Fase 5).
+Cuando cierra una subasta:
+- Si tiene ofertas: setea ganador al ofertante de la oferta más alta
+  (desempate por creado_en más temprano, mismo criterio que precio_actual)
+- Si no tiene ofertas: cierra sin ganador (ganador queda None)
 """
-from datetime import timedelta
-
 from django.core.management.base import BaseCommand
+from django.db import transaction
 from django.utils import timezone
 
-from subastas.models import Subasta
+from subastas.models import Subasta, Oferta
 
 
 class Command(BaseCommand):
-    help = "Cierra subastas expiradas (estado='activa' con fecha_cierre en el pasado)"
+    help = "Cierra subastas expiradas (estado='activa' con fecha_cierre en el pasado). Setea ganador si hay ofertas."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -44,9 +45,14 @@ class Command(BaseCommand):
                 )
             )
             for s in expiradas:
+                oferta_count = s.ofertas.count()
+                ganador_info = ""
+                if oferta_count > 0:
+                    mejor = s.ofertas.order_by("-monto", "creado_en").first()
+                    ganador_info = f" [ganador: {mejor.ofertante.username} ${mejor.monto}]"
                 self.stdout.write(
                     f"  - pk={s.pk} titulo='{s.titulo}' "
-                    f"fecha_cierre={s.fecha_cierre.isoformat()}"
+                    f"ofertas={oferta_count}{ganador_info}"
                 )
             return
 
@@ -56,24 +62,56 @@ class Command(BaseCommand):
             )
             return
 
-        # Capture pks/titulos BEFORE update.
-        # After .update(estado=CERRADA), the queryset re-evaluates with the
-        # original filter (estado=ACTIVA), which no longer matches the updated
-        # rows. So we must capture the audit data before the update.
+        # Capture pks BEFORE update (audit trail fix from R4.1)
         expiradas_info = list(expiradas.values_list("pk", "titulo", "fecha_cierre"))
 
-        # Cerrar (update batch, 1 query)
-        actualizadas = expiradas.update(estado=Subasta.Estado.CERRADA)
+        cerradas_con_ganador = 0
+        cerradas_sin_ofertas = 0
+        audit_trail = []
 
+        # Per-row close with ganador assignment (transactional)
+        with transaction.atomic():
+            for pk, titulo, fecha_cierre in expiradas_info:
+                # select_for_update prevents race with ofertar() view
+                subasta = Subasta.objects.select_for_update().get(pk=pk)
+
+                # Find highest oferta (desempate por creado_en más temprano)
+                mejor_oferta = subasta.ofertas.order_by("-monto", "creado_en").first()
+
+                if mejor_oferta:
+                    subasta.ganador = mejor_oferta.ofertante
+                    cerradas_con_ganador += 1
+                    audit_trail.append(
+                        (pk, titulo, fecha_cierre, mejor_oferta.ofertante.username, mejor_oferta.monto)
+                    )
+                else:
+                    cerradas_sin_ofertas += 1
+                    audit_trail.append(
+                        (pk, titulo, fecha_cierre, None, None)
+                    )
+
+                subasta.estado = Subasta.Estado.CERRADA
+                subasta.save()
+
+        # Report
         self.stdout.write(
             self.style.SUCCESS(
-                f"{actualizadas} subasta(s) cerrada(s) correctamente."
+                f"{count} subasta(s) cerrada(s): "
+                f"{cerradas_con_ganador} con ganador, "
+                f"{cerradas_sin_ofertas} sin ofertas."
             )
         )
 
-        # Listar las cerradas (audit trail) using captured data
+        # Audit trail
         self.stdout.write("Subastas cerradas:")
-        for pk, titulo, fecha_cierre in expiradas_info:
-            self.stdout.write(
-                f"  - pk={pk} titulo='{titulo}' fecha_cierre={fecha_cierre.isoformat()}"
-            )
+        for pk, titulo, fecha_cierre, ganador_username, ganador_monto in audit_trail:
+            if ganador_username:
+                self.stdout.write(
+                    f"  - pk={pk} titulo='{titulo}' fecha_cierre={fecha_cierre.isoformat()} "
+                    f"ganador='{ganador_username}' monto=${ganador_monto}"
+                )
+            else:
+                self.stdout.write(
+                    f"  - pk={pk} titulo='{titulo}' fecha_cierre={fecha_cierre.isoformat()} "
+                    f"(sin ofertas, sin ganador)"
+                )

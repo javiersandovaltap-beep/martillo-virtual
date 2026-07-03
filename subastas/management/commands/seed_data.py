@@ -204,6 +204,13 @@ class Command(BaseCommand):
             )
             if created:
                 creadas_subastas += 1
+                # Backdate creado_en for closed subastas (auto_now_add sets it to now,
+                # but fecha_cierre is in the past -> creado_en > fecha_cierre = inconsistent).
+                # Fix: set creado_en to 30 days before fecha_cierre so timeline makes sense.
+                if estado == "cerrada":
+                    Subasta.objects.filter(titulo=titulo).update(
+                        creado_en=fecha_cierre - timedelta(days=30)
+                    )
             subastas_by_titulo[titulo] = Subasta.objects.get(titulo=titulo)
 
         self.stdout.write(self.style.SUCCESS(

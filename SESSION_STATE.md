@@ -5,9 +5,9 @@
 
 ## Current state
 
-- Phase: 4 (Hardening) - completed
-- Last commit: docs: update SESSION_STATE.md for Phase 4 closure
-- Last tag: v0.5-stable (pending)
+- Phase: 4.5 (Pre-deploy polish) - completed
+- Last commit: docs: update SESSION_STATE.md for Phase 4.5 closure
+- Last tag: v0.6-stable (pending)
 - Blockers: none
 - Next step: Phase 5 (Deploy doc + Reflection: Dockerfile, render.yaml, README rewrite, POSTMORTEM)
 
@@ -80,6 +80,36 @@
 - feat(D09): add django-ratelimit to login_view and registro (c1f6620) - 5/m + 3/h, 5 tests
 - fix(D09): silence django-ratelimit E003/W001 (59fc7bc) - LocMemCache not shared, OK for dev
 - docs: update SESSION_STATE.md for Phase 4 closure (this commit)
+
+### Phase 4.5 - Pre-deploy polish (v0.6-stable)
+- feat(seed): expand demo data to 15 subastas, 5 users, 17 ofertas (2dbe4e4) - 9 activas, 4 cerradas, 2 canceladas
+- feat(frontend): polish image placeholders with pattern + SVG icons (b82f668)
+- feat(model): add ganador FK to Subasta + tiene_ganador/monto_ganador properties (e0c5000)
+- fix(model): add missing tiene_ganador/monto_ganador properties (92cc37d) - script v1 silent FAIL fixed
+- feat(cerrar_subastas): set ganador when closing subasta with ofertas (5e1e009) - desempate by creado_en
+- feat(signals): email al ganador via post_save signal (2f240d6) - console backend dev, SMTP prod
+- feat(views): InicioView ?estado= filter tabs + detalle shows ganador (af29967) - 8 new tests
+- feat(dashboard): MisSubastasView adds 'mis_ofertas_recientes' (11415ab) - last 5 ofertas, 5 new tests
+- fix(frontend): mobile navbar solid bg + pagination preserves ?estado= filter (9c83680) - 2 UX bugs
+- fix(frontend): dark mode persists via localStorage + finalizada 3-tier logic (bd837b4) - 2 UX bugs
+- fix(seed): backdate creado_en for closed subastas (this commit) - data consistency (creado < cierre)
+
+Phase 4.5 metrics:
+- 11 commits (8 features + 3 fixes + this closure)
+- 119 tests total (94 from Phase 4 + 25 new)
+- New model field: Subasta.ganador (FK User, SET_NULL)
+- New file: subastas/signals.py (pre_save + post_save for email notification)
+- New email backend config: console (dev), SMTP (prod)
+- New InicioView feature: ?estado=activas|cerradas|todas filter with tabs
+- New dashboard section: 'Mis ofertas recientes' in MisSubastasView
+- Dark mode persists via localStorage
+- 3-tier finalizada logic (ganador > con ofertas > sin ofertas)
+- Data consistency: closed subastas have creado_en < fecha_cierre
+
+Decisions: D29 (ganador FK with SET_NULL), D30 (email via signal, fail_silently),
+D31 (InicioView ?estado= filter), D32 (mis_ofertas_recientes last 5, exclude own subastas),
+D33 (dark mode via localStorage, not cookie), D34 (3-tier finalizada logic for data resilience)
+
 
 Phase 4 metrics:
 - 94 tests total (21 models + 21 forms + 40 views + 7 mgmt + 5 ratelimit)
@@ -158,6 +188,12 @@ Phase 4 metrics:
 - D26: tests/ folder with test_models.py, test_views.py, test_forms.py (scalable structure)
 - D27: tests use assertNumQueries to verify N+1 doesn't regress (B03/B04 regression tests)
 - D28: django-ratelimit with block=True (403 status), LocMemCache in dev, Redis optional in prod
+- D29: Subasta.ganador FK User with on_delete=SET_NULL (preserve historial if user deleted)
+- D30: email al ganador via post_save signal, fail_silently=True (don't break cerrar_subastas)
+- D31: InicioView ?estado=activas|cerradas|todas filter (tabs in template, default activas)
+- D32: mis_ofertas_recientes limited to 5, excludes own subastas (avoid confusion)
+- D33: dark mode via localStorage (not cookie), fallback to prefers-color-scheme
+- D34: 3-tier finalizada logic (ganador > con ofertas > sin ofertas) for data resilience
 
 ## Open questions
 

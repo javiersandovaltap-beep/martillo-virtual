@@ -148,8 +148,10 @@ a{color:inherit}
 .auction-card__image{position:relative;aspect-ratio:4/3;overflow:hidden;background:var(--color-surface-offset)}
 .auction-card__image img{width:100%;height:100%;object-fit:cover;transition:transform var(--duration-slow) var(--ease-out)}
 .auction-card:hover .auction-card__image img{transform:scale(1.04)}
-.auction-card__placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-3);color:var(--color-text-faint);font-size:3rem;background:linear-gradient(135deg,var(--color-surface-offset),var(--color-surface))}
-.auction-card__placeholder::after{content:'Sin imagen';font-size:var(--text-xs);font-family:var(--font-body);letter-spacing:0.05em;text-transform:uppercase}
+.auction-card__placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-3);color:var(--color-text-faint);font-size:3rem;background:radial-gradient(circle at 30% 20%,color-mix(in oklch,var(--color-gold-subtle) 60%,var(--color-surface-offset)),var(--color-surface-offset) 70%);position:relative;overflow:hidden}
+.auction-card__placeholder::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,transparent,transparent 12px,color-mix(in oklch,var(--color-gold) 4%,transparent) 12px,color-mix(in oklch,var(--color-gold) 4%,transparent) 24px);opacity:0.5}
+.auction-card__placeholder svg{position:relative;z-index:1;opacity:0.4}
+.auction-card__placeholder::after{content:'Sin imagen';position:relative;z-index:1;font-size:var(--text-xs);font-family:var(--font-body);letter-spacing:0.08em;text-transform:uppercase;font-weight:600;color:var(--color-text-faint)}
 .auction-card__badge{position:absolute;top:var(--space-3);right:var(--space-3);padding:var(--space-1) var(--space-3);border-radius:var(--radius-full);background:rgba(26,23,20,0.72);backdrop-filter:blur(8px);color:#fff;font-size:var(--text-xs);font-weight:600}
 .auction-card__status{position:absolute;top:var(--space-3);left:var(--space-3);display:flex;align-items:center;gap:var(--space-1);padding:var(--space-1) var(--space-2);border-radius:var(--radius-full);background:rgba(26,23,20,0.72);backdrop-filter:blur(8px);color:#4a9d5a;font-size:var(--text-xs);font-weight:600}
 .auction-card__status::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;animation:blink 2s ease-in-out infinite}
@@ -170,7 +172,9 @@ a{color:inherit}
 @media(max-width:960px){.detail-grid{grid-template-columns:1fr}}
 .detail-image{border-radius:var(--radius-xl);overflow:hidden;aspect-ratio:4/3;background:var(--color-surface-offset);box-shadow:var(--shadow-md)}
 .detail-image img{width:100%;height:100%;object-fit:cover}
-.detail-image--empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-4);color:var(--color-text-faint);font-family:var(--font-body)}
+.detail-image--empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-4);color:var(--color-text-faint);font-family:var(--font-body);background:radial-gradient(circle at 30% 20%,color-mix(in oklch,var(--color-gold-subtle) 60%,var(--color-surface-offset)),var(--color-surface-offset) 70%);position:relative;overflow:hidden}
+.detail-image--empty::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(45deg,transparent,transparent 16px,color-mix(in oklch,var(--color-gold) 4%,transparent) 16px,color-mix(in oklch,var(--color-gold) 4%,transparent) 32px);opacity:0.5}
+.detail-image--empty-icon,.detail-image--empty-label{position:relative;z-index:1}
 .detail-image--empty-icon{font-size:4rem}
 .detail-image--empty-label{font-size:var(--text-sm);letter-spacing:0.06em;text-transform:uppercase}
 .detail-price-box{position:sticky;top:calc(5rem + var(--space-6));background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-8);box-shadow:var(--shadow-md)}

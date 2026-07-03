@@ -28,18 +28,23 @@ class InicioView(ListView):
         from django.db.models import Count, Max, F, OuterRef, Subquery
         from django.db.models.functions import Coalesce
 
-        # Subquery for total_ofertas count
         total_ofertas_subquery = Oferta.objects.filter(subasta=OuterRef('pk')).order_by().values('subasta').annotate(count=Count('id')).values('count')
-        # Subquery for precio_actual: latest (highest) oferta monto, or price_inicial if none
         precio_actual_subquery = Oferta.objects.filter(subasta=OuterRef('pk')).order_by('-monto').values('monto')[:1]
 
+        # Filter by ?estado= query param (Commit 6)
+        estado_filter = self.request.GET.get("estado", "activas").lower()
+        qs = Subasta.objects.all()
+        if estado_filter == "cerradas":
+            qs = qs.filter(estado=Subasta.Estado.CERRADA)
+        elif estado_filter == "todas":
+            pass  # sin filtro
+        else:  # "activas" o cualquier otro valor
+            qs = qs.filter(estado=Subasta.Estado.ACTIVA)
+
         return (
-            Subasta.objects
-            .filter(estado="activa")
+            qs
             .order_by("-creado_en")
             .annotate(
-                # Annotate with subqueries to avoid GROUP BY in the main query.
-                # This allows the paginator's count to be a simple count on Subasta table.
                 _total_ofertas=Coalesce(Subquery(total_ofertas_subquery), 0),
                 _precio_actual=Coalesce(Subquery(precio_actual_subquery), F('precio_inicial')),
             )
@@ -47,15 +52,14 @@ class InicioView(ListView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        # Use paginator.count (already calculated by ListView) instead of
-        # running a separate COUNT query via self.get_queryset().count()
         paginator = ctx.get("paginator")
         if paginator:
             ctx["total_subastas"] = paginator.count
         else:
             ctx["total_subastas"] = self.object_list.count()
+        # Pass current filter to template for active tab styling (Commit 6)
+        ctx["estado_filter"] = self.request.GET.get("estado", "activas").lower()
         return ctx
-
 
 # ─── Detalle ─────────────────────────────────────────────────────────────────
 class DetalleView(DetailView):

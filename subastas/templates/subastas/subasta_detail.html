@@ -85,7 +85,15 @@
               <a href="{% url 'subastas:registro' %}" class="btn btn--ghost" style="width:100%;justify-content:center;display:flex;margin-top:var(--space-3);">Crear cuenta gratis</a>
             {% endif %}
           {% else %}
-            <div class="alert alert--error">Esta subasta ha finalizado.</div>
+            {% if subasta.tiene_ganador %}
+              <div class="alert alert--success" style="margin-bottom:var(--space-4);">
+                <strong>Subasta finalizada</strong><br/>
+                Ganador: <strong>{{ subasta.ganador.username }}</strong><br/>
+                Monto ganador: <strong>${{ subasta.monto_ganador }}</strong>
+              </div>
+            {% else %}
+              <div class="alert alert--error">Esta subasta ha finalizado sin ofertas.</div>
+            {% endif %}
           {% endif %}
           <hr class="divider" style="margin-top:var(--space-6);" />
           <div style="display:flex;flex-direction:column;gap:var(--space-2);">

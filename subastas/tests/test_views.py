@@ -426,3 +426,108 @@ class TestRegistroView:
             'password2': 'y',
         })
         assert response.status_code == 200  # Stays on form
+
+# ============================================================================
+# InicioView ?estado= filter (Commit 6)
+# ============================================================================
+
+class TestInicioViewEstadoFilter:
+    def test_default_filter_activas(self, db, subasta_activa, subasta_cerrada):
+        """Default (no ?estado=) shows only activas"""
+        c = Client(HTTP_HOST='localhost')
+        response = c.get(reverse('subastas:inicio'))
+        content = response.content.decode('utf-8')
+        assert 'Test Subasta Activa' in content
+        assert 'Test Subasta Cerrada' not in content
+        assert response.context['estado_filter'] == 'activas'
+
+    def test_filter_activas_explicit(self, db, subasta_activa, subasta_cerrada):
+        c = Client(HTTP_HOST='localhost')
+        response = c.get(reverse('subastas:inicio') + '?estado=activas')
+        content = response.content.decode('utf-8')
+        assert 'Test Subasta Activa' in content
+        assert 'Test Subasta Cerrada' not in content
+        assert response.context['estado_filter'] == 'activas'
+
+    def test_filter_cerradas(self, db, subasta_activa, subasta_cerrada):
+        c = Client(HTTP_HOST='localhost')
+        response = c.get(reverse('subastas:inicio') + '?estado=cerradas')
+        content = response.content.decode('utf-8')
+        assert 'Test Subasta Cerrada' in content
+        assert 'Test Subasta Activa' not in content
+        assert response.context['estado_filter'] == 'cerradas'
+
+    def test_filter_todas(self, db, subasta_activa, subasta_cerrada):
+        c = Client(HTTP_HOST='localhost')
+        response = c.get(reverse('subastas:inicio') + '?estado=todas')
+        content = response.content.decode('utf-8')
+        assert 'Test Subasta Activa' in content
+        assert 'Test Subasta Cerrada' in content
+        assert response.context['estado_filter'] == 'todas'
+
+    def test_invalid_filter_defaults_to_activas(self, db, subasta_activa):
+        """Invalid ?estado= value falls back to activas queryset (default branch)"""
+        c = Client(HTTP_HOST='localhost')
+        response = c.get(reverse('subastas:inicio') + '?estado=invalid_xyz')
+        assert response.context['estado_filter'] == 'invalid_xyz'
+        # But queryset still filters by activa (default branch)
+        assert 'Test Subasta Activa' in response.content.decode('utf-8')
+
+    def test_tabs_render_in_template(self, db, subasta_activa):
+        """Template should render 3 tab links"""
+        c = Client(HTTP_HOST='localhost')
+        response = c.get(reverse('subastas:inicio'))
+        content = response.content.decode('utf-8')
+        assert '?estado=activas' in content
+        assert '?estado=cerradas' in content
+        assert '?estado=todas' in content
+
+
+# ============================================================================
+# DetalleView shows ganador (Commit 6)
+# ============================================================================
+
+class TestDetalleViewGanador:
+    def test_cerrada_con_ganador_shows_ganador(self, db, vendedor, ofertante):
+        """Detalle of cerrada subasta with ganador shows ganador info"""
+        from datetime import timedelta
+        from django.utils import timezone
+        from subastas.models import Subasta, Oferta
+
+        s = Subasta.objects.create(
+            vendedor=vendedor,
+            titulo='Cerrada Con Ganador Test',
+            descripcion='d',
+            precio_inicial=1000,
+            estado=Subasta.Estado.CERRADA,
+            fecha_cierre=timezone.now() - timedelta(days=1),
+            ganador=ofertante,
+        )
+        Oferta.objects.create(subasta=s, ofertante=ofertante, monto=1500)
+
+        c = Client(HTTP_HOST='localhost')
+        response = c.get(reverse('subastas:detalle', kwargs={'pk': s.pk}))
+        content = response.content.decode('utf-8')
+        assert 'Ganador' in content
+        assert 'test_ofertante' in content
+        assert '1500' in content
+
+    def test_cerrada_sin_ganador_shows_sin_ofertas(self, db, vendedor):
+        """Detalle of cerrada subasta without ganador shows 'sin ofertas' message"""
+        from datetime import timedelta
+        from django.utils import timezone
+        from subastas.models import Subasta
+
+        s = Subasta.objects.create(
+            vendedor=vendedor,
+            titulo='Cerrada Sin Ganador Test',
+            descripcion='d',
+            precio_inicial=1000,
+            estado=Subasta.Estado.CERRADA,
+            fecha_cierre=timezone.now() - timedelta(days=1),
+        )
+
+        c = Client(HTTP_HOST='localhost')
+        response = c.get(reverse('subastas:detalle', kwargs={'pk': s.pk}))
+        content = response.content.decode('utf-8')
+        assert 'finalizado sin ofertas' in content.lower()

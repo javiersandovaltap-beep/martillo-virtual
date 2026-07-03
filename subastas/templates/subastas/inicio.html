@@ -21,8 +21,19 @@
 <section class="page-section">
   <div class="container">
     <div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);margin-bottom:var(--space-8);">
-      <h2 style="font-family:var(--font-display);font-size:var(--text-xl);font-weight:800;letter-spacing:-0.02em;">Subastas activas</h2>
+      <h2 style="font-family:var(--font-display);font-size:var(--text-xl);font-weight:800;letter-spacing:-0.02em;">
+        {% if estado_filter == "cerradas" %}Subastas cerradas
+        {% elif estado_filter == "todas" %}Todas las subastas
+        {% else %}Subastas activas{% endif %}
+      </h2>
       <span style="font-size:var(--text-sm);color:var(--color-text-faint);">{{ total_subastas|default:"0" }} disponible{{ total_subastas|pluralize:"s" }}</span>
+    </div>
+
+    <!-- Tabs de filtrado (Commit 6) -->
+    <div style="display:flex;gap:var(--space-2);margin-bottom:var(--space-8);flex-wrap:wrap;">
+      <a href="?estado=activas" class="btn {% if estado_filter == 'activas' %}btn--primary{% else %}btn--ghost{% endif %} btn--sm">Activas</a>
+      <a href="?estado=cerradas" class="btn {% if estado_filter == 'cerradas' %}btn--primary{% else %}btn--ghost{% endif %} btn--sm">Cerradas</a>
+      <a href="?estado=todas" class="btn {% if estado_filter == 'todas' %}btn--primary{% else %}btn--ghost{% endif %} btn--sm">Todas</a>
     </div>
     {% if subastas %}
       <div class="auction-grid">

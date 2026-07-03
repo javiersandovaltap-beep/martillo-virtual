@@ -5,11 +5,11 @@
 
 ## Current state
 
-- Phase: 3 (Estabilizacion) - completed
-- Last commit: docs: update SESSION_STATE.md for Phase 3 closure
-- Last tag: v0.4-stable (pending)
+- Phase: 4 (Hardening) - completed
+- Last commit: docs: update SESSION_STATE.md for Phase 4 closure
+- Last tag: v0.5-stable (pending)
 - Blockers: none
-- Next step: Phase 4 (Hardening: tests, coverage 80%+, rate limiting)
+- Next step: Phase 5 (Deploy doc + Reflection: Dockerfile, render.yaml, README rewrite, POSTMORTEM)
 
 ## Project context
 
@@ -69,6 +69,25 @@
 - feat: add cerrar_subastas management command (a59136e) - D10, ready for cron in Fase 5
 - docs: update django-frontend.md with Phase 3 fix statuses (70e3468)
 - docs: L29 (free tier LLM rate limits) - to be added
+
+### Phase 4 - Hardening (v0.5-stable)
+- feat(test): setup pytest-django + conftest with fixtures (76f7e6d) - D25, D26
+- test(models): add comprehensive Subasta + Oferta tests (727a5ca) - 21 tests
+- test(forms): add SubastaForm + OfertaForm + RegistroForm + LoginForm tests (08cc204) - 21 tests
+- test(views): add comprehensive view tests (690359c) - 40 tests
+- test(mgmt): add cerrar_subastas command tests (73c9027) - 7 tests
+- fix(cerrar_subastas): capture pks before update for audit trail (f983251) - bug found by test
+- feat(D09): add django-ratelimit to login_view and registro (c1f6620) - 5/m + 3/h, 5 tests
+- fix(D09): silence django-ratelimit E003/W001 (59fc7bc) - LocMemCache not shared, OK for dev
+- docs: update SESSION_STATE.md for Phase 4 closure (this commit)
+
+Phase 4 metrics:
+- 94 tests total (21 models + 21 forms + 40 views + 7 mgmt + 5 ratelimit)
+- 97% total coverage (863 stmts, 26 missing)
+- views.py: 99% (2 lines missing), models.py: 100% (objective: 80%+)
+- 1 bug found by tests (cerrar_subastas audit trail)
+- ~2 minutes total test runtime
+
 
 
 
@@ -135,6 +154,10 @@
 - D22: eliminate fecha_inicio (redundant with creado_en, both auto_now_add) - keep creado_en
 - D23: B06 fix uses hardcoded HTML (not form rendering) to preserve design system styling
 - D24: cerrar_subastas via management command + cron (D10 confirmed, not celery/signal)
+- D25: pytest-django in place of Django TestCase (better output, fixtures, parametrize)
+- D26: tests/ folder with test_models.py, test_views.py, test_forms.py (scalable structure)
+- D27: tests use assertNumQueries to verify N+1 doesn't regress (B03/B04 regression tests)
+- D28: django-ratelimit with block=True (403 status), LocMemCache in dev, Redis optional in prod
 
 ## Open questions
 
@@ -166,12 +189,12 @@
 | S03 | ALLOWED_HOSTS parsing fragile | Phase 1 | fixed (e27b513) |
 | S05 | Open redirect (see B07) | Phase 1 | fixed (8bf3758) |
 | S06 | /admin/ exposed without protection | Phase 1 | confirmed Option A (D05) |
-| S07 | No rate limiting in auth | Phase 4 | pending |
+| S07 | No rate limiting in auth | Phase 4 | fixed (c1f6620, django-ratelimit 5/m + 3/h) |
 | S08 | README lies about CSP | Phase 5 | pending |
 | S09 | No SECURE_PROXY_SSL_HEADER | Phase 1 | fixed (b21268b) |
 | S10 | HSTS 1 year without pre-commit warn | Phase 1 | fixed (0afa99f) |
 | C01 | requirements vs venv mismatch | Phase 0 | fixed |
 | C02 | martillo_v3/ stale | Phase 0 | removed |
 | C04 | No git init | Phase 0 | fixed |
-| C06 | No tests | Phase 4 | pending |
+| C06 | No tests | Phase 4 | fixed (94 tests, 97% coverage) |
 | C08 | ManifestStaticFilesStorage in dev | Phase 2 | fixed (e3fabee) |

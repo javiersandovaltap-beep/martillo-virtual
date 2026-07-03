@@ -91,6 +91,11 @@
                 Ganador: <strong>{{ subasta.ganador.username }}</strong><br/>
                 Monto ganador: <strong>${{ subasta.monto_ganador }}</strong>
               </div>
+            {% elif subasta.total_ofertas > 0 %}
+              <div class="alert alert--info" style="margin-bottom:var(--space-4);">
+                <strong>Subasta finalizada</strong><br/>
+                {{ subasta.total_ofertas }} oferta{{ subasta.total_ofertas|pluralize:"s" }} recibida{{ subasta.total_ofertas|pluralize:"s" }}. Precio final: ${{ subasta.precio_actual }}.
+              </div>
             {% else %}
               <div class="alert alert--error">Esta subasta ha finalizado sin ofertas.</div>
             {% endif %}

@@ -11,9 +11,9 @@ class OfertaInline(admin.TabularInline):
 
 @admin.register(Subasta)
 class SubastaAdmin(admin.ModelAdmin):
-    list_display  = ("titulo", "vendedor", "precio_actual", "total_ofertas", "estado", "fecha_cierre")
+    list_display  = ("titulo", "vendedor", "precio_actual", "total_ofertas", "estado", "fecha_cierre", "ganador")
     list_filter   = ("estado", "fecha_cierre")
-    search_fields = ("titulo", "vendedor__username")
+    search_fields = ("titulo", "vendedor__username", "ganador__username")
     readonly_fields = ("creado_en", "actualizado_en")
     inlines = [OfertaInline]
 

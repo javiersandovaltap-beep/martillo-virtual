@@ -20,6 +20,14 @@ class Subasta(models.Model):
     fecha_cierre   = models.DateTimeField()
     creado_en      = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
+    ganador        = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="subastas_ganadas",
+        verbose_name="Ganador",
+    )
 
     class Meta:
         ordering = ["-creado_en"]

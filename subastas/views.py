@@ -189,15 +189,12 @@ class MisSubastasView(LoginRequiredMixin, ListView):
         )
 
     def get_context_data(self, **kwargs):
-        from django.db.models import Count, Sum, IntegerField
+        from django.db.models import Count, Sum, IntegerField, Q
         from django.db.models.functions import Coalesce
 
         ctx = super().get_context_data(**kwargs)
-        # Use the already-annotated queryset (self.object_list) for stats
-        # to avoid re-running queries.
         qs = self.object_list
 
-        # Aggregate all stats in ONE query using the annotated _total_ofertas
         now = timezone.now()
         stats = qs.aggregate(
             total=Count('id'),
@@ -206,8 +203,17 @@ class MisSubastasView(LoginRequiredMixin, ListView):
             total_ofertas_recibidas=Coalesce(Sum('_total_ofertas', output_field=IntegerField()), 0),
         )
         ctx.update(stats)
-        return ctx
 
+        # Commit 7: mis_ofertas_recientes - last 5 ofertas user has made on others' subastas
+        mis_ofertas = (
+            Oferta.objects
+            .filter(ofertante=self.request.user)
+            .exclude(subasta__vendedor=self.request.user)  # no ofertas on own subastas
+            .select_related('subasta', 'subasta__vendedor')
+            .order_by('-creado_en')[:5]
+        )
+        ctx['mis_ofertas_recientes'] = mis_ofertas
+        return ctx
 
 # ─── Auth ─────────────────────────────────────────────────────────────────────
 @ratelimit(key='ip', rate='3/h', block=True)

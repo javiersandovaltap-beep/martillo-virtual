@@ -531,3 +531,98 @@ class TestDetalleViewGanador:
         response = c.get(reverse('subastas:detalle', kwargs={'pk': s.pk}))
         content = response.content.decode('utf-8')
         assert 'finalizado sin ofertas' in content.lower()
+
+# ============================================================================
+# MisSubastasView mis_ofertas_recientes (Commit 7)
+# ============================================================================
+
+class TestMisSubastasViewOfertasRecientes:
+    def test_context_has_mis_ofertas_recientes(self, db, vendedor, ofertante, subasta_activa):
+        """MisSubastasView context should include mis_ofertas_recientes"""
+        from subastas.models import Oferta
+        # ofertante hace oferta en subasta de vendedor
+        Oferta.objects.create(subasta=subasta_activa, ofertante=ofertante, monto=1500)
+
+        c = Client(HTTP_HOST='localhost')
+        c.force_login(ofertante)
+        response = c.get(reverse('subastas:mis_subastas'))
+        assert 'mis_ofertas_recientes' in response.context
+
+    def test_mis_ofertas_excludes_own_subastas(self, db, vendedor, ofertante):
+        """mis_ofertas_recientes should NOT include ofertas on own subastas"""
+        from datetime import timedelta
+        from django.utils import timezone
+        from subastas.models import Subasta, Oferta
+
+        # vendedor creates a subasta
+        s = Subasta.objects.create(
+            vendedor=vendedor, titulo='S1', descripcion='d',
+            precio_inicial=100, fecha_cierre=timezone.now() + timedelta(days=1),
+        )
+        # vendedor makes oferta on own subasta (allowed in DB, prevented in view but possible via admin)
+        Oferta.objects.create(subasta=s, ofertante=vendedor, monto=200)
+        # ofertante makes oferta on vendedor's subasta
+        Oferta.objects.create(subasta=s, ofertante=ofertante, monto=300)
+
+        c = Client(HTTP_HOST='localhost')
+        c.force_login(vendedor)
+        response = c.get(reverse('subastas:mis_subastas'))
+        mis_ofertas = response.context['mis_ofertas_recientes']
+        # vendedor's own oferta on own subasta should be EXCLUDED
+        for o in mis_ofertas:
+            assert o.subasta.vendedor != vendedor, f'Found oferta on own subasta: {o.subasta.titulo}'
+
+    def test_mis_ofertas_limited_to_5(self, db, vendedor, ofertante):
+        """mis_ofertas_recientes should return at most 5 most recent"""
+        from datetime import timedelta
+        from django.utils import timezone
+        from subastas.models import Subasta, Oferta
+
+        # Create 7 subastas owned by vendedor, ofertante offers on all
+        for i in range(7):
+            s = Subasta.objects.create(
+                vendedor=vendedor, titulo=f'S{i}', descripcion='d',
+                precio_inicial=100, fecha_cierre=timezone.now() + timedelta(days=1),
+            )
+            Oferta.objects.create(subasta=s, ofertante=ofertante, monto=100 + i)
+
+        c = Client(HTTP_HOST='localhost')
+        c.force_login(ofertante)
+        response = c.get(reverse('subastas:mis_subastas'))
+        mis_ofertas = response.context['mis_ofertas_recientes']
+        assert len(mis_ofertas) == 5  # limited to 5
+
+    def test_mis_ofertas_ordered_by_creado_en_desc(self, db, vendedor, ofertante):
+        """mis_ofertas_recientes should be ordered by creado_en desc (newest first)"""
+        from datetime import timedelta
+        from django.utils import timezone
+        from subastas.models import Subasta, Oferta
+
+        s1 = Subasta.objects.create(
+            vendedor=vendedor, titulo='Old', descripcion='d',
+            precio_inicial=100, fecha_cierre=timezone.now() + timedelta(days=1),
+        )
+        Oferta.objects.create(subasta=s1, ofertante=ofertante, monto=110)
+        # Small delay to ensure different creado_en
+        import time
+        time.sleep(0.01)
+        s2 = Subasta.objects.create(
+            vendedor=vendedor, titulo='New', descripcion='d',
+            precio_inicial=100, fecha_cierre=timezone.now() + timedelta(days=1),
+        )
+        Oferta.objects.create(subasta=s2, ofertante=ofertante, monto=120)
+
+        c = Client(HTTP_HOST='localhost')
+        c.force_login(ofertante)
+        response = c.get(reverse('subastas:mis_subastas'))
+        mis_ofertas = list(response.context['mis_ofertas_recientes'])
+        assert mis_ofertas[0].subasta.titulo == 'New'  # newest first
+        assert mis_ofertas[1].subasta.titulo == 'Old'
+
+    def test_mis_ofertas_empty_for_user_without_ofertas(self, db, vendedor):
+        """User without ofertas should have empty mis_ofertas_recientes"""
+        c = Client(HTTP_HOST='localhost')
+        c.force_login(vendedor)
+        response = c.get(reverse('subastas:mis_subastas'))
+        mis_ofertas = response.context['mis_ofertas_recientes']
+        assert len(mis_ofertas) == 0

@@ -1,5 +1,40 @@
 {% extends "base.html" %}
-{% block title %}Mis Subastas{% endblock %}
+{% block title %}Mis Subastas
+    <!-- Mis ofertas recientes (Commit 7) -->
+    {% if mis_ofertas_recientes %}
+    <div style="margin-top:var(--space-12);">
+      <h2 style="font-family:var(--font-display);font-size:var(--text-xl);font-weight:800;letter-spacing:-0.02em;margin-bottom:var(--space-6);">Mis ofertas recientes</h2>
+      <div class="dashboard-table-wrap">
+        <table class="bids-table">
+          <thead><tr><th>Subasta</th><th>Vendedor</th><th>Mi oferta</th><th>Estado</th><th>¿Voy ganando?</th><th>Fecha</th></tr></thead>
+          <tbody>
+            {% for oferta in mis_ofertas_recientes %}
+            <tr>
+              <td><a href="{% url 'subastas:detalle' oferta.subasta.pk %}" style="color:var(--color-text);text-decoration:none;font-weight:600;font-family:var(--font-display);">{{ oferta.subasta.titulo|truncatewords:5 }}</a></td>
+              <td style="color:var(--color-text-muted);">{{ oferta.subasta.vendedor.username }}</td>
+              <td style="font-weight:700;color:var(--color-gold);font-variant-numeric:tabular-nums;">${{ oferta.monto }}</td>
+              <td>
+                {% if oferta.subasta.esta_activa %}<span class="badge badge--active">Activa</span>
+                {% elif oferta.subasta.estado == 'cerrada' %}<span class="badge badge--closed">Cerrada</span>
+                {% else %}<span class="badge badge--closed">Cancelada</span>{% endif %}
+              </td>
+              <td>
+                {% if oferta.subasta.ganador_id == oferta.ofertante_id %}
+                  <span style="color:var(--color-success);font-weight:600;">Sí (ganador)</span>
+                {% else %}
+                  <span style="color:var(--color-text-faint);">No</span>
+                {% endif %}
+              </td>
+              <td style="color:var(--color-text-faint);font-size:var(--text-xs);">{{ oferta.creado_en|date:"d/m/Y H:i" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
+{% endblock %}
 {% block content %}
 <section class="page-section">
   <div class="container">

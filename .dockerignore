@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.pytest_cache/
+
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
+
+# Django
+db.sqlite3
+*.sqlite3
+staticfiles/
+media/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation (not needed in container)
+*.md
+!requirements.txt
+
+# Test coverage
+htmlcov/
+.coverage
+.coverage.*
+
+# Claude Code / project meta
+.claude/
+SESSION_STATE.md
+CLAUDE.md
+AGENTS.md
+ALTERNATIVES.md
+
+# Scripts (one-time, not needed in runtime)
+scripts/
+
+# Docker
+Dockerfile
+.dockerignore

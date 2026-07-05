@@ -53,6 +53,9 @@
   </ul>
 </nav>
 
+<!-- Mobile menu backdrop (Commit: fix mobile navbar translucency) -->
+<div class="navbar__backdrop" id="nav-backdrop"></div>
+
 {% if messages %}
 <div style="max-width:var(--content-wide);margin:var(--space-4) auto 0;padding-inline:clamp(var(--space-4),4vw,var(--space-12));">
   {% for msg in messages %}
@@ -84,8 +87,12 @@
   setIcon(d);
   if(t){t.addEventListener('click',function(){d=d==='dark'?'light':'dark';r.setAttribute('data-theme',d);setIcon(d);localStorage.setItem('theme',d);});}
   var h=document.getElementById('hamburger');var n=document.getElementById('nav-links');
-  if(h&&n){h.addEventListener('click',function(){var o=n.classList.toggle('is-open');h.setAttribute('aria-expanded',o);});
-  document.addEventListener('click',function(e){if(n.classList.contains('is-open')&&!h.contains(e.target)&&!n.contains(e.target)){n.classList.remove('is-open');h.setAttribute('aria-expanded','false');}});}
+  if(h&&n){
+    var b=document.getElementById('nav-backdrop');
+    h.addEventListener('click',function(){var o=n.classList.toggle('is-open');h.setAttribute('aria-expanded',o);if(b){b.classList.toggle('is-visible',o);}});
+    if(b){b.addEventListener('click',function(){n.classList.remove('is-open');h.setAttribute('aria-expanded','false');b.classList.remove('is-visible');});}
+    document.addEventListener('click',function(e){if(n.classList.contains('is-open')&&!h.contains(e.target)&&!n.contains(e.target)&&(!b||!b.contains(e.target))){n.classList.remove('is-open');h.setAttribute('aria-expanded','false');if(b){b.classList.remove('is-visible');}}});
+  }
   document.querySelectorAll('.fade-in-up').forEach(function(el,i){el.style.animationDelay=(i*80)+'ms';});
 })();
 </script>

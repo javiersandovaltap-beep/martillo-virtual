@@ -1,0 +1,55 @@
+# Render Blueprint - Infrastructure as Code for MartilloVirtual
+# Docs: https://render.com/docs/blueprint-spec
+#
+# This file allows `render blueprint deploy` from CLI or
+# connecting the repo to Render and selecting 'Blueprint' deploy.
+#
+# IMPORTANT: secrets (SECRET_KEY, DATABASE_URL) are NOT hardcoded here.
+# Render generates SECRET_KEY automatically (generateValue: true).
+# DATABASE_URL must be set manually after creating Supabase project
+# (Settings > Environment > add DATABASE_URL with the postgres connection string).
+
+services:
+  - type: web
+    name: martillo-virtual
+    runtime: python
+    region: oregon  # change to your preferred region
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
+      python manage.py migrate
+    startCommand: gunicorn config.wsgi --workers 2 --bind 0.0.0.0:$PORT --timeout 120
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: DJANGO_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: martillo-virtual.onrender.com  # update to your actual Render URL after first deploy
+      - key: DATABASE_URL
+        sync: false  # set manually from Supabase
+      - key: WEB_CONCURRENCY
+        value: 2
+      - key: PYTHON_VERSION
+        value: 3.14.5
+
+  # Cron job to close expired subastas (runs every hour)
+  - type: cron
+    name: martillo-cerrar-subastas
+    runtime: python
+    schedule: "0 * * * *"  # every hour at minute 0
+    buildCommand: pip install -r requirements.txt
+    startCommand: python manage.py cerrar_subastas
+    envVars:
+      - key: DJANGO_ENV
+        value: production
+      - key: SECRET_KEY
+        sync: false  # sync from web service after deploy
+      - key: ALLOWED_HOSTS
+        value: martillo-virtual.onrender.com
+      - key: DATABASE_URL
+        sync: false  # set manually from Supabase
+      - key: PYTHON_VERSION
+        value: 3.14.5

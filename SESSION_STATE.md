@@ -5,11 +5,18 @@
 
 ## Current state
 
-- Phase: 4.5 (Pre-deploy polish) - completed
-- Last commit: docs: update SESSION_STATE.md for Phase 4.5 closure
-- Last tag: v0.6-stable (pending)
+- Phase: 5 (Deploy + Reflection) - completed
+- Last commit: docs: update SESSION_STATE.md for Phase 5 closure
+- Last tag: v1.0-stable (pending)
 - Blockers: none
-- Next step: Phase 5 (Deploy doc + Reflection: Dockerfile, render.yaml, README rewrite, POSTMORTEM)
+- Next step: PROJECT COMPLETE. Ready for deploy (see DEPLOY.md) + GitHub push.
+
+Project status: PORTFOLIO READY
+- 60+ commits
+- 125 tests passing (97% coverage)
+- Deploy artifacts: Dockerfile, Procfile, render.yaml, DEPLOY.md
+- Documentation: README (honest), POSTMORTEM (reflection), DEPLOY (dual guide)
+- All 6 phases completed (0-5) + Phase 4.5 (pre-deploy polish)
 
 ## Project context
 
@@ -68,7 +75,29 @@
 - fix(B06): remove dead form_oferta from context, align HTML min with server validation (2ab50c7)
 - feat: add cerrar_subastas management command (a59136e) - D10, ready for cron in Fase 5
 - docs: update django-frontend.md with Phase 3 fix statuses (70e3468)
-- docs: L29 (free tier LLM rate limits) - to be added
+
+### Phase 5 - Deploy + Reflection (v1.0-stable)
+- feat(backfill): add backfill_ganadores command + 6 tests (b773500) - data consistency
+- feat(devops): add Dockerfile (learning exercise) + .dockerignore (61a550e) - multi-stage build
+- feat(deploy): add Procfile + runtime.txt + .python-version (b920213) - Render deploy config
+- feat(deploy): add render.yaml (Blueprint IaC) with web + cron services (f4b84f5) - 2 services
+- docs(deploy): add DEPLOY.md with dual guide (personal + repo) (718b5ec) - 9+6 pasos + troubleshooting
+- docs(S08): rewrite README without false claims (91d19e5) - removed CSP/partialdef/background tasks claims
+- docs(postmortem): add POSTMORTEM.md with project reflection + 3-model experiment (e072fdc)
+- docs: update SESSION_STATE.md for Phase 5 closure (this commit)
+
+Phase 5 metrics:
+- 8 commits (4 features + 4 docs)
+- New commands: backfill_ganadores (data consistency)
+- Deploy artifacts: Dockerfile, .dockerignore, Procfile, runtime.txt, .python-version, render.yaml
+- Documentation: DEPLOY.md (dual guide), README rewrite (S08 closed), POSTMORTEM.md (reflection)
+- backfill_ganadores set 3 ganadores + triggered 3 email signals (integration verified)
+
+Decisions: D35 (Dockerfile multi-stage learning exercise), D36 (render.yaml Blueprint IaC),
+D37 (DEPLOY.md dual: personal + repo), D38 (backfill_ganadores for data consistency)
+
+PROJECT COMPLETE. Ready for deploy + GitHub push.
+
 
 ### Phase 4 - Hardening (v0.5-stable)
 - feat(test): setup pytest-django + conftest with fixtures (76f7e6d) - D25, D26
@@ -194,6 +223,10 @@ Phase 4 metrics:
 - D32: mis_ofertas_recientes limited to 5, excludes own subastas (avoid confusion)
 - D33: dark mode via localStorage (not cookie), fallback to prefers-color-scheme
 - D34: 3-tier finalizada logic (ganador > con ofertas > sin ofertas) for data resilience
+- D35: Dockerfile multi-stage build (learning exercise, not for Render deploy)
+- D36: render.yaml Blueprint IaC (web + cron services, DATABASE_URL sync: false)
+- D37: DEPLOY.md dual guide (personal testing + repo production-ready)
+- D38: backfill_ganadores command for data consistency (setea ganador en cerradas sin ganador)
 
 ## Open questions
 
@@ -226,7 +259,7 @@ Phase 4 metrics:
 | S05 | Open redirect (see B07) | Phase 1 | fixed (8bf3758) |
 | S06 | /admin/ exposed without protection | Phase 1 | confirmed Option A (D05) |
 | S07 | No rate limiting in auth | Phase 4 | fixed (c1f6620, django-ratelimit 5/m + 3/h) |
-| S08 | README lies about CSP | Phase 5 | pending |
+| S08 | README lies about CSP | Phase 5 | fixed (91d19e5, rewritten without false claims) |
 | S09 | No SECURE_PROXY_SSL_HEADER | Phase 1 | fixed (b21268b) |
 | S10 | HSTS 1 year without pre-commit warn | Phase 1 | fixed (0afa99f) |
 | C01 | requirements vs venv mismatch | Phase 0 | fixed |

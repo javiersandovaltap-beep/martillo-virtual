@@ -2,6 +2,20 @@
 
 Casa de subastas online construida con **Django 6.0**. Proyecto de portafolio que demuestra arquitectura profesional: CRUD con CBVs, separacion de entornos, tests automatizados, protocolo de ganador con notificaciones email, y deploy-ready en Render + Supabase.
 
+## Demo
+
+| Homepage (Light/Dark Mode) | Dashboard (Mis Subastas) |
+| :---: | :---: |
+| ![Homepage Light/Dark](docs/screenshots/homepagelightdark.gif) | ![Dashboard](docs/screenshots/dashboard.gif) |
+
+| Subasta Activa (Countdown) | Subasta Cerrada (Ganador) |
+| :---: | :---: |
+| ![Subasta Activa](docs/screenshots/subasta-detail-activa.gif) | ![Subasta Cerrada](docs/screenshots/subasta-detail-cerrada.gif) |
+
+| Filtro por Estado | Menú Móvil (Dark Mode) |
+| :---: | :---: |
+| ![Filtro por Estado](docs/screenshots/homepage-tabs.gif) | ![Menú Móvil](docs/screenshots/mobile-menu.gif) |
+
 ## Stack
 
 | Capa | Tecnologia |

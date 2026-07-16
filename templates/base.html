@@ -95,11 +95,16 @@
   }
   document.querySelectorAll('.fade-in-up').forEach(function(el,i){el.style.animationDelay=(i*80)+'ms';});
   // Preserve scroll position on tab change (filter tabs)
+  // Override CSS scroll-behavior:smooth BEFORE restore to avoid animation
   document.querySelectorAll('a[href*="?estado="]').forEach(function(tab){
     tab.addEventListener('click',function(){sessionStorage.setItem('savedScroll',window.scrollY);});
   });
   var ss=sessionStorage.getItem('savedScroll');
-  if(ss!==null){window.scrollTo(0,parseInt(ss));sessionStorage.removeItem('savedScroll');}
+  if(ss!==null){
+    document.documentElement.style.scrollBehavior='auto';
+    window.scrollTo(0,parseInt(ss));
+    sessionStorage.removeItem('savedScroll');
+  }
 })();
 </script>
 {% block extra_scripts %}{% endblock %}

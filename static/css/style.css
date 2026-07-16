@@ -111,7 +111,7 @@ a{color:inherit}
 .theme-toggle:hover{color:var(--color-gold);border-color:var(--color-gold-subtle);background:var(--color-gold-subtle)}
 
 /* Mobile menu backdrop (fix translucency perception) */
-.navbar__backdrop{position:fixed;inset:0;background:rgba(0,0,0,0);z-index:190;pointer-events:none;transition:background var(--duration-base) var(--ease-out)}
+.navbar__backdrop{position:fixed;inset:0;background:rgba(0,0,0,0);z-index:90;pointer-events:none;transition:background var(--duration-base) var(--ease-out)}
 .navbar__backdrop.is-visible{background:rgba(0,0,0,0.5);pointer-events:auto}
 @media(min-width:769px){.navbar__backdrop{display:none!important}}
 
@@ -148,7 +148,7 @@ a{color:inherit}
 .btn--pulse{animation:pulse-gold 2.5s ease-in-out infinite}
 
 /* Auction cards */
-.auction-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:var(--space-6)}
+.auction-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:var(--space-6);scroll-margin-top:6rem}
 .auction-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow-sm);transition:transform var(--duration-base) var(--ease-out),box-shadow var(--duration-base) var(--ease-out),border-color var(--duration-base) var(--ease-out)}
 .auction-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:rgba(196,127,23,0.25)}
 .auction-card__image{position:relative;aspect-ratio:4/3;overflow:hidden;background:var(--color-surface-offset)}

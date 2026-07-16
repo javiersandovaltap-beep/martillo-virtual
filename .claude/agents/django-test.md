@@ -1,6 +1,6 @@
 ---
 name: django-test
-description: Use this agent for writing and running Django tests: TestCase or pytest-django, fixtures, coverage reports, integration tests, and race condition tests. Use for any task that creates or modifies test files (tests.py, test_*.py, conftest.py, pytest.ini) or runs test suites.
+description: "Use this agent for writing and running Django tests: TestCase or pytest-django, fixtures, coverage reports, integration tests, and race condition tests. Use for any task that creates or modifies test files (tests.py, test_*.py, conftest.py, pytest.ini) or runs test suites."
 tools: Read, Edit, Write, Bash, Grep, Glob
 model: opus
 ---

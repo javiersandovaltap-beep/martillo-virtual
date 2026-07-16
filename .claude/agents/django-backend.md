@@ -1,6 +1,6 @@
 ---
 name: django-backend
-description: Use this agent for Django backend tasks: views (CBV/FBV), models, forms, urls, admin, middleware, management commands, and migrations. Specializes in Django ORM optimization (select_related, prefetch_related, annotate), transaction management (atomic, select_for_update), and Django 6.0 features. Use for any task that touches subastas/models.py, subastas/views.py, subastas/forms.py, subastas/urls.py, subastas/admin.py, subastas/management/, subastas/migrations/, config/urls.py, or config/settings/*.py.
+description: "Use this agent for Django backend tasks: views (CBV/FBV), models, forms, urls, admin, middleware, management commands, and migrations. Specializes in Django ORM optimization (select_related, prefetch_related, annotate), transaction management (atomic, select_for_update), and Django 6.0 features. Use for any task that touches subastas/models.py, subastas/views.py, subastas/forms.py, subastas/urls.py, subastas/admin.py, subastas/management/, subastas/migrations/, config/urls.py, or config/settings/*.py."
 tools: Read, Edit, Write, Bash, Grep, Glob
 model: sonnet
 ---

@@ -1,6 +1,6 @@
 ---
 name: django-frontend
-description: Use this agent for Django frontend tasks: HTML templates (Django template language: extends, blocks, static, csrf_token), CSS, JavaScript vanilla, static files organization, and UX/UI improvements. Use for any task that touches subastas/templates/*.html, templates/base.html, static/css/style.css, or static/js/*.js.
+description: "Use this agent for Django frontend tasks: HTML templates (Django template language: extends, blocks, static, csrf_token), CSS, JavaScript vanilla, static files organization, and UX/UI improvements. Use for any task that touches subastas/templates/*.html, templates/base.html, static/css/style.css, or static/js/*.js."
 tools: Read, Edit, Write, Bash, Grep, Glob
 model: sonnet
 ---

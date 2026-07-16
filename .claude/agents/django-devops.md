@@ -1,6 +1,6 @@
 ---
 name: django-devops
-description: Use this agent for deploy configuration tasks: Dockerfile, render.yaml, Procfile, runtime.txt, .python-version, gunicorn config, white noise config, collectstatic, CI/CD, and deploy troubleshooting. Use for any task that creates or modifies deploy artifacts.
+description: "Use this agent for deploy configuration tasks: Dockerfile, render.yaml, Procfile, runtime.txt, .python-version, gunicorn config, white noise config, collectstatic, CI/CD, and deploy troubleshooting. Use for any task that creates or modifies deploy artifacts."
 tools: Read, Edit, Write, Bash, Grep, Glob
 model: opus
 ---

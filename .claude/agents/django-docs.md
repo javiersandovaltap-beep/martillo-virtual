@@ -1,6 +1,6 @@
 ---
 name: django-docs
-description: Use this agent for documentation tasks: README.md, POSTMORTEM.md, DEPLOY.md, SESSION_STATE.md updates, AGENTS.md updates, CLAUDE.md updates, ALTERNATIVES.md updates, and inline code docstrings. Use for any task that primarily creates or modifies documentation files.
+description: "Use this agent for documentation tasks: README.md, POSTMORTEM.md, DEPLOY.md, SESSION_STATE.md updates, AGENTS.md updates, CLAUDE.md updates, ALTERNATIVES.md updates, and inline code docstrings. Use for any task that primarily creates or modifies documentation files."
 tools: Read, Edit, Write, Bash, Grep, Glob
 model: sonnet
 ---

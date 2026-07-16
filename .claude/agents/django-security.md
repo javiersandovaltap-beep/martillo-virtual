@@ -1,6 +1,6 @@
 ---
 name: django-security
-description: Use this agent for security audits, hardening, and OWASP compliance tasks. Use for auditing SECRET_KEY handling, DEBUG setting, ALLOWED_HOSTS, CSRF, XSS, SQL injection, open redirects, admin protection, rate limiting, HSTS, CSP, cookie security, and other Django security settings. Use proactively before deploying.
+description: "Use this agent for security audits, hardening, and OWASP compliance tasks. Use for auditing SECRET_KEY handling, DEBUG setting, ALLOWED_HOSTS, CSRF, XSS, SQL injection, open redirects, admin protection, rate limiting, HSTS, CSP, cookie security, and other Django security settings. Use proactively before deploying."
 tools: Read, Edit, Write, Bash, Grep, Glob
 model: opus
 ---

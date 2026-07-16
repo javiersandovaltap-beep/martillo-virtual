@@ -94,6 +94,12 @@
     document.addEventListener('click',function(e){if(n.classList.contains('is-open')&&!h.contains(e.target)&&!n.contains(e.target)&&(!b||!b.contains(e.target))){n.classList.remove('is-open');h.setAttribute('aria-expanded','false');if(b){b.classList.remove('is-visible');}}});
   }
   document.querySelectorAll('.fade-in-up').forEach(function(el,i){el.style.animationDelay=(i*80)+'ms';});
+  // Preserve scroll position on tab change (filter tabs)
+  document.querySelectorAll('a[href*="?estado="]').forEach(function(tab){
+    tab.addEventListener('click',function(){sessionStorage.setItem('savedScroll',window.scrollY);});
+  });
+  var ss=sessionStorage.getItem('savedScroll');
+  if(ss!==null){window.scrollTo(0,parseInt(ss));sessionStorage.removeItem('savedScroll');}
 })();
 </script>
 {% block extra_scripts %}{% endblock %}

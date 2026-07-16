@@ -31,9 +31,9 @@
 
     <!-- Tabs de filtrado (Commit 6) -->
     <div style="display:flex;gap:var(--space-2);margin-bottom:var(--space-8);flex-wrap:wrap;">
-      <a href="?estado=activas#subastas" class="btn {% if estado_filter == 'activas' %}btn--primary{% else %}btn--ghost{% endif %} btn--sm">Activas</a>
-      <a href="?estado=cerradas#subastas" class="btn {% if estado_filter == 'cerradas' %}btn--primary{% else %}btn--ghost{% endif %} btn--sm">Cerradas</a>
-      <a href="?estado=todas#subastas" class="btn {% if estado_filter == 'todas' %}btn--primary{% else %}btn--ghost{% endif %} btn--sm">Todas</a>
+      <a href="?estado=activas" class="btn {% if estado_filter == 'activas' %}btn--primary{% else %}btn--ghost{% endif %} btn--sm">Activas</a>
+      <a href="?estado=cerradas" class="btn {% if estado_filter == 'cerradas' %}btn--primary{% else %}btn--ghost{% endif %} btn--sm">Cerradas</a>
+      <a href="?estado=todas" class="btn {% if estado_filter == 'todas' %}btn--primary{% else %}btn--ghost{% endif %} btn--sm">Todas</a>
     </div>
     {% if subastas %}
       <div class="auction-grid" id="subastas">

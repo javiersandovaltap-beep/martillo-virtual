@@ -19,11 +19,9 @@ services:
       pip install -r requirements.txt
       python manage.py collectstatic --noinput
       python manage.py migrate
+      python manage.py seed_data
+      python manage.py backfill_ganadores
     startCommand: gunicorn config.wsgi --workers 2 --bind 0.0.0.0:$PORT --timeout 120
-    # releaseCommand runs after build, before going live.
-    # Perfect for seeding data on Free tier (no SSH/Shell access needed).
-    # Uses get_or_create (idempotent), safe to run on every deploy.
-    releaseCommand: python manage.py seed_data && python manage.py backfill_ganadores
     healthCheckPath: /
     autoDeploy: true
     envVars:

@@ -238,3 +238,19 @@ El flujo senior con 3 modelos valido el patron: planificar (chat) + ejecutar (Cl
 ---
 
 *Documento generado en Phase 5, Commit 7. Tag final: v1.0-stable.*
+
+---
+
+## UPDATE: Deploy Exitoso (Post-Project)
+
+El deploy en Render + Supabase se completó exitosamente.
+
+**URL pública:** https://martillo-virtual.onrender.com
+
+**Lecciones del deploy real:**
+1. **IPv6 vs IPv4 en Render Free Tier:** Render intentó conectar a Supabase via IPv6 por defecto, fallando con "Network is unreachable". Fix: usar el Connection Pooler de Supabase (host `.pooler.supabase.com`) que fuerza IPv4.
+2. **`releaseCommand` en Free Tier:** aunque la documentación de Render lo soporta, en la práctica el plan Free no lo ejecutó de forma fiable.
+3. **`buildCommand` chaining:** para correr comandos de DB (migrate, seed) en el build de Render Free, fue necesario encadenarlos con `&&` en una sola línea en lugar de multiline (`|`).
+4. **Render Shell es de pago:** para poblar la DB sin acceso SSH, movimos `seed_data` al `buildCommand` temporalmente, luego lo removimos una vez poblada.
+
+El proyecto está oficialmente EN PRODUCCIÓN y listo para ser añadido al portafolio profesional.

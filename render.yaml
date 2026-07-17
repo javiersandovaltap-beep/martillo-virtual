@@ -15,9 +15,11 @@ services:
     runtime: python
     region: oregon  # change to your preferred region
     plan: free
-    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate && python manage.py seed_data && python manage.py backfill_ganadores
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate
     startCommand: gunicorn config.wsgi --workers 2 --bind 0.0.0.0:$PORT --timeout 120
     healthCheckPath: /
+    # Note: seed_data was run manually during initial deploy. 
+    # To re-seed in future, run via Render Shell (paid) or add seed_data back to buildCommand temporarily.
     autoDeploy: true
     envVars:
       - key: DJANGO_ENV

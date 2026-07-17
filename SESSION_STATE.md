@@ -5,18 +5,18 @@
 
 ## Current state
 
-- Phase: 5 (Deploy + Reflection) - completed
-- Last commit: docs: update SESSION_STATE.md for Phase 5 closure
-- Last tag: v1.0-stable (pending)
+- Phase: PROJECT DEPLOYED AND COMPLETED
+- Last commit: chore: final cleanup + deploy confirmation
+- Last tag: v1.0-stable
 - Blockers: none
-- Next step: PROJECT COMPLETE. Ready for deploy (see DEPLOY.md) + GitHub push.
 
-Project status: PORTFOLIO READY
-- 60+ commits
+Project status: DEPLOYED IN PRODUCTION
+- Live URL: https://martillo-virtual.onrender.com
+- DB: Supabase PostgreSQL (provisioned and seeded)
+- 67 commits
 - 125 tests passing (97% coverage)
-- Deploy artifacts: Dockerfile, Procfile, render.yaml, DEPLOY.md
-- Documentation: README (honest), POSTMORTEM (reflection), DEPLOY (dual guide)
 - All 6 phases completed (0-5) + Phase 4.5 (pre-deploy polish)
+- Deploy verified: homepage loads, login works, DB populated
 
 ## Project context
 

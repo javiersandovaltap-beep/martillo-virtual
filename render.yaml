@@ -14,6 +14,7 @@ services:
     name: martillo-virtual
     runtime: python
     region: oregon  # change to your preferred region
+    plan: free
     buildCommand: |
       pip install -r requirements.txt
       python manage.py collectstatic --noinput
@@ -40,6 +41,7 @@ services:
     name: martillo-cerrar-subastas
     runtime: python
     schedule: "0 * * * *"  # every hour at minute 0
+    plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: python manage.py cerrar_subastas
     envVars:

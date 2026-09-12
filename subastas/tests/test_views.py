@@ -18,7 +18,6 @@ Uses Django test Client with HTTP_HOST='localhost' (L25).
 from datetime import timedelta
 from decimal import Decimal
 
-import pytest
 from django.contrib.auth.models import User
 from django.test import Client
 from django.urls import reverse

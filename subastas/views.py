@@ -1,14 +1,13 @@
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy
-from django.http import HttpResponseForbidden
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
-from django.db import transaction, models
+from django.db import transaction
 from django.db.models import Q
 from django_ratelimit.decorators import ratelimit
 from django.utils import timezone
@@ -25,7 +24,7 @@ class InicioView(ListView):
     paginate_by = 9
 
     def get_queryset(self):
-        from django.db.models import Count, Max, F, OuterRef, Subquery
+        from django.db.models import Count, F, OuterRef, Subquery
         from django.db.models.functions import Coalesce
 
         total_ofertas_subquery = Oferta.objects.filter(subasta=OuterRef('pk')).order_by().values('subasta').annotate(count=Count('id')).values('count')
@@ -171,7 +170,7 @@ class MisSubastasView(LoginRequiredMixin, ListView):
     login_url = "subastas:login"
 
     def get_queryset(self):
-        from django.db.models import Count, Max, F, OuterRef, Subquery
+        from django.db.models import Count, F, OuterRef, Subquery
         from django.db.models.functions import Coalesce
 
         # Same annotation pattern as InicioView (B03 fix, L27)
@@ -189,7 +188,7 @@ class MisSubastasView(LoginRequiredMixin, ListView):
         )
 
     def get_context_data(self, **kwargs):
-        from django.db.models import Count, Sum, IntegerField, Q
+        from django.db.models import Count, Sum, IntegerField
         from django.db.models.functions import Coalesce
 
         ctx = super().get_context_data(**kwargs)

@@ -2,10 +2,8 @@
 Tests for backfill_ganadores command.
 """
 from datetime import timedelta
-from decimal import Decimal
 from io import StringIO
 
-import pytest
 from django.contrib.auth.models import User
 from django.core.management import call_command
 from django.utils import timezone

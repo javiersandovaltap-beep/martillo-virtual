@@ -10,9 +10,7 @@ Covers:
 - Email content is correct
 """
 from datetime import timedelta
-from unittest.mock import patch
 
-import pytest
 from django.contrib.auth.models import User
 from django.core import mail
 from django.utils import timezone

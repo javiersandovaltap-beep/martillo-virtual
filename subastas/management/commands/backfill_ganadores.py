@@ -14,7 +14,6 @@ Seguro de correr multiples veces (idempotente: solo afecta cerradas sin ganador)
 """
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from django.utils import timezone
 
 from subastas.models import Subasta
 

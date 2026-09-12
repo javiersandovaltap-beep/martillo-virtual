@@ -6,7 +6,6 @@ Covers:
 - registro: 3/h limit (3 attempts allowed, 4th blocked)
 - Valid logins under limit still work
 """
-import pytest
 from django.test import Client
 from django.urls import reverse
 

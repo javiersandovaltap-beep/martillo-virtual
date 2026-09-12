@@ -9,15 +9,10 @@ Covers:
 - LoginForm (valid, invalid credentials)
 """
 from datetime import timedelta
-from decimal import Decimal
 
-import pytest
-from django.contrib.auth.models import User
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 
 from subastas.forms import SubastaForm, OfertaForm, RegistroForm, LoginForm
-from subastas.models import Subasta
 
 
 # ============================================================================
@@ -27,7 +22,6 @@ from subastas.models import Subasta
 class TestSubastaFormFechaCierre:
     def test_fecha_cierre_past_rejected(self, db, vendedor):
         """Fecha de cierre en el pasado -> ValidationError"""
-        from django import forms
         data = {
             'titulo': 'Test',
             'descripcion': 'desc',

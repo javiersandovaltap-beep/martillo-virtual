@@ -5,10 +5,11 @@
 
 ## Current state
 
-- Phase: PROJECT DEPLOYED AND COMPLETED
-- Last commit: chore: final cleanup + deploy confirmation
-- Last tag: v1.0-stable
+- Phase: v2.0 ROADMAP - Fase 0 CLOSED, Fase 1 (CI/CD) next
+- Last commit: chore: close Fase 0 (environment reproducibility validated)
+- Last tag: v2.0-fase0-stable
 - Blockers: none
+- Known flaky test: test_ratelimit.py::test_6th_attempt_blocked (see L30, fix deferred to Fase 3)
 
 Project status: DEPLOYED IN PRODUCTION
 - Live URL: https://martillo-virtual.onrender.com
@@ -194,6 +195,7 @@ Phase 4 metrics:
 - L27: @property is a Python data descriptor and takes precedence over instance __dict__. Annotating a queryset with the SAME name as a property does NOT shadow the property -- the property is still called. To use annotations in list views while keeping properties for single-instance access, use different annotation names (e.g., _total_ofertas) and add hasattr(self, '_total_ofertas') checks at the start of properties to use the annotated value when available.
 - L28: Filtering queries by substring ('COUNT' in sql and 'subastas_oferta' in sql) gives false positives when a main SELECT has COUNT subqueries embedded. Correct metric for N+1 detection: total query count before/after fix. If total drops from N to 2-3, the fix worked. To filter pure COUNT queries, use q['sql'].lstrip().upper().startswith('SELECT COUNT') which matches only queries that START with SELECT COUNT, not those with COUNT embedded.
 - L29: Free tier LLM APIs (NVIDIA NIM, free-claude-code-live proxy) have hard daily/hourly rate limits (e.g., 32 req/worker). On a project of this size (~30 commits, multiple validation rounds), rate limits get exhausted before completing the work. Strategy: when rate limits are hit, switch to deterministic bash/python scripts that don't depend on LLM APIs. Document the limit pattern in POSTMORTEM.md so future projects plan LLM usage budget. The 3-model experiment must be re-scoped: instead of 'compare 3 models on 5 task types', it becomes 'compare models where available, document rate limit impact, and rely on scripts for the rest'.
+- L30: test_ratelimit.py::test_6th_attempt_blocked is intermittently flaky (observed 7 pass / 1 fail across 8 isolated runs, no pytest-randomly installed, no state leakage). Hypothesis: django-ratelimit likely uses fixed time-window buckets (per-minute), so if the 6 sequential requests in the test cross a real minute boundary mid-run, the counter resets and the 6th request is not blocked. Not a regression from the machine migration -- reproduced identically in a fresh environment. Fix (mock the clock or confirm windowing strategy) deferred to Fase 3 (Backend hardening), where LocMemCache/rate limiting is already in scope. Do not fix opportunistically in Fase 0 or Fase 1 threads.
 
 ## Decisions log
 

@@ -5,11 +5,12 @@
 
 ## Current state
 
-- Phase: v2.0 ROADMAP - Fase 0 CLOSED, Fase 1 (CI/CD) next
-- Last commit: chore: close Fase 0 (environment reproducibility validated)
-- Last tag: v2.0-fase0-stable
+- Phase: v2.0 ROADMAP - Fase 1 (CI/CD) CLOSED, Fase 1.5 (lint cleanup) next, then Fase 2
+- Last commit: docs: close Fase 1 (CI/CD with GitHub Actions)
+- Last tag: v2.0-fase1-stable
 - Blockers: none
-- Known flaky test: test_ratelimit.py::test_6th_attempt_blocked (see L30, fix deferred to Fase 3)
+- Known flaky test: test_ratelimit.py::test_6th_attempt_blocked (see L30) -- passed clean in both CI runs so far, still deferred to Fase 3
+- Lint debt: 29 ruff findings (see D39 in ALTERNATIVES.md), tracked for Fase 1.5, NOT blocking CI yet
 
 Project status: DEPLOYED IN PRODUCTION
 - Live URL: https://martillo-virtual.onrender.com
@@ -27,6 +28,27 @@ Project status: DEPLOYED IN PRODUCTION
 - Definition of done: portfolio ready for GitHub, locally tested, scalable
 - DB: no real data, resettable
 - Frontend language: Spanish (UI text, templates); operational .md files in English (L01)
+
+## v2.0 Roadmap - Phase history
+
+### Fase 0 - Reproducible environment (v2.0-fase0-stable)
+- Environment reproduced on new machine (Git Bash, Python 3.14.6, venv from requirements.txt)
+- All 7 git tags intact (v0.1-stable to v1.0-stable, plus v2.0-fase0-stable)
+- Fixed origin remote (was pointing to .bundle migration file instead of GitHub)
+- Known flaky test documented: test_ratelimit.py::test_6th_attempt_blocked (L30), fix deferred to Fase 3
+
+### Fase 1 - CI/CD with GitHub Actions (v2.0-fase1-stable)
+- .github/workflows/ci.yml created with 2 parallel jobs:
+  - test: pytest --cov=subastas --cov-report=term-missing --cov-fail-under=95 (blocking)
+  - lint: ruff check . (continue-on-error:true, informational, NOT blocking -- see D39)
+- SECRET_KEY configured as a GitHub Actions secret (repo settings, not hardcoded)
+- requirements-dev.txt created (separate from requirements.txt): includes ruff==0.14.4, not shipped to production
+- .coveragerc created: excludes seed_data.py, migrations/, tests/ from coverage calculation (see L31)
+- Validated: push to main triggers CI and finishes green (98.08% real coverage, 125/125 tests)
+- Validated: a PR with an intentionally broken test correctly fails the workflow (test branch
+  created, verified, then deleted -- never merged to main)
+- First-ever ruff run surfaced 29 findings in pre-existing code (never linted before)
+  -- mechanical cleanup deferred to Fase 1.5 to avoid scope creep in this thread (see D39)
 
 ## Phase history
 
@@ -196,6 +218,7 @@ Phase 4 metrics:
 - L28: Filtering queries by substring ('COUNT' in sql and 'subastas_oferta' in sql) gives false positives when a main SELECT has COUNT subqueries embedded. Correct metric for N+1 detection: total query count before/after fix. If total drops from N to 2-3, the fix worked. To filter pure COUNT queries, use q['sql'].lstrip().upper().startswith('SELECT COUNT') which matches only queries that START with SELECT COUNT, not those with COUNT embedded.
 - L29: Free tier LLM APIs (NVIDIA NIM, free-claude-code-live proxy) have hard daily/hourly rate limits (e.g., 32 req/worker). On a project of this size (~30 commits, multiple validation rounds), rate limits get exhausted before completing the work. Strategy: when rate limits are hit, switch to deterministic bash/python scripts that don't depend on LLM APIs. Document the limit pattern in POSTMORTEM.md so future projects plan LLM usage budget. The 3-model experiment must be re-scoped: instead of 'compare 3 models on 5 task types', it becomes 'compare models where available, document rate limit impact, and rely on scripts for the rest'.
 - L30: test_ratelimit.py::test_6th_attempt_blocked is intermittently flaky (observed 7 pass / 1 fail across 8 isolated runs, no pytest-randomly installed, no state leakage). Hypothesis: django-ratelimit likely uses fixed time-window buckets (per-minute), so if the 6 sequential requests in the test cross a real minute boundary mid-run, the counter resets and the 6th request is not blocked. Not a regression from the machine migration -- reproduced identically in a fresh environment. Fix (mock the clock or confirm windowing strategy) deferred to Fase 3 (Backend hardening), where LocMemCache/rate limiting is already in scope. Do not fix opportunistically in Fase 0 or Fase 1 threads.
+- L31: pytest-cov with --cov=<package> measures coverage over the ENTIRE package by default, including management commands never meant to be covered by the test suite (e.g., seed_data.py, a manual demo-data script) and even the test files themselves. This can produce a coverage gate failure (--cov-fail-under) that looks like a real regression but is actually a scope problem. Fix: create .coveragerc with an explicit omit list (non-business-logic scripts, migrations/, tests/) so the gate measures only code that SHOULD be tested. Discovered when CI failed at 94% despite 125/125 tests passing -- seed_data.py alone (0% coverage, 65 statements) accounted for the entire gap.
 
 ## Decisions log
 

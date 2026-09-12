@@ -124,3 +124,14 @@
 - Alternative: Spanish (more readable for user)
 - Reason: token efficiency (English tokens are shorter in LLMs), Claude trained primarily on English, consistency with prompts
 - Action: Phase 0 baseline re-committed with English .md files. README, DEPLOY.md, POSTMORTEM.md remain in Spanish (human consumption).
+
+## D39: CI lint gate mode (informational vs blocking)
+
+- Chosen: ruff check runs in CI as a separate job, non-blocking (continue-on-error: true)
+- Alternative: blocking gate from the start (fail the workflow on any ruff finding)
+- Reason: first-ever ruff run on ~67 commits of pre-existing code surfaced 29 findings
+  (mostly F401 unused imports in tests, a few F841/F811, plus F403/F405 on intentional
+  settings star-imports). Blocking immediately would have required mixing a large mechanical
+  cleanup into the CI/CD setup thread (Fase 1), violating Phase discipline (CLAUDE.md rule 5).
+- Action: cleanup deferred to Fase 1.5 (lint cleanup), a short dedicated thread before Fase 2.
+  Once Fase 1.5 reaches 0 real findings, revisit continue-on-error and switch to blocking.

@@ -1,0 +1,10 @@
+[run]
+source = subastas
+omit =
+    subastas/management/commands/seed_data.py
+    subastas/migrations/*
+    subastas/tests/*
+
+[report]
+exclude_lines =
+    pragma: no cover

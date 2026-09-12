@@ -27,7 +27,7 @@ from subastas.models import Subasta, Oferta
 
 class TestSubastaStr:
     def test_str_returns_titulo(self, subasta_activa):
-        assert str(subasta_activa) == "Test Subasta Activa"
+        assert str(subasta_activa) == "THIS SHOULD FAIL"
 
     def test_str_with_empty_titulo(self, db, vendedor):
         # Edge case: titulo with special chars

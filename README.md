@@ -1,5 +1,7 @@
 # MartilloVirtual
 
+[![CI](https://github.com/javiersandovaltap-beep/martillo-virtual/actions/workflows/ci.yml/badge.svg)](https://github.com/javiersandovaltap-beep/martillo-virtual/actions/workflows/ci.yml)
+
 Casa de subastas online construida con **Django 6.0**. Proyecto de portafolio que demuestra arquitectura profesional: CRUD con CBVs, separacion de entornos, tests automatizados, protocolo de ganador con notificaciones email, y deploy-ready en Render + Supabase.
 
 ## Demo

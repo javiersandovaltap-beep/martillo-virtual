@@ -5,12 +5,12 @@
 
 ## Current state
 
-- Phase: v2.0 ROADMAP - Fase 1 (CI/CD) CLOSED, Fase 1.5 (lint cleanup) next, then Fase 2
-- Last commit: docs: close Fase 1 (CI/CD with GitHub Actions)
-- Last tag: v2.0-fase1-stable
+- Phase: v2.0 ROADMAP - Fase 1.5 (lint cleanup) CLOSED, Fase 2 (playbook enforcement) next
+- Last commit: ci: promote ruff lint job from informational to blocking
+- Last tag: v2.0-fase1.5-stable
 - Blockers: none
-- Known flaky test: test_ratelimit.py::test_6th_attempt_blocked (see L30) -- passed clean in both CI runs so far, still deferred to Fase 3
-- Lint debt: 29 ruff findings (see D39 in ALTERNATIVES.md), tracked for Fase 1.5, NOT blocking CI yet
+- Known flaky test: test_ratelimit.py::test_6th_attempt_blocked (see L30) -- reproduced once more during Fase 1.5 isolated re-run (1 fail in full suite, 3/3 pass standalone), still deferred to Fase 3
+- Lint debt: RESOLVED (see D39 closure in ALTERNATIVES.md). Lint gate is now blocking in CI.
 
 Project status: DEPLOYED IN PRODUCTION
 - Live URL: https://martillo-virtual.onrender.com
@@ -51,6 +51,28 @@ Project status: DEPLOYED IN PRODUCTION
   -- mechanical cleanup deferred to Fase 1.5 to avoid scope creep in this thread (see D39)
 
 ## Phase history
+
+### Fase 1.5 - Lint cleanup (v2.0-fase1.5-stable)
+- Root cause found before cleanup: venv (recreated during Fase 0 machine migration)
+  never had requirements-dev.txt installed. Shell fell back to a global ruff 0.16.6
+  install with an expanded default ruleset, producing 105 findings instead of the
+  29 recorded at Fase 1 close. Fixed by installing requirements-dev.txt in the venv
+  (see L32).
+- Resolved 22/29 findings via `ruff check --fix .` (F401 unused imports across
+  subastas/tests/*.py, views.py, management commands) -- commit 42c7835
+- Resolved 3 F841 (unused local variables) via manual review:
+  - test_backfill.py: 1 finding, required care because `s` is reused in the OTHER
+    5 test methods in the same class -- a naive global sed would have broken them
+    (see L33). Fixed via `sed` range-limited to the first occurrence only.
+  - test_views.py: 2 findings (other_subasta, my_subasta), safe to remove --
+    commit 718b4ea
+- Resolved 2x F403 + 1x F405 in config/settings/ (intentional star imports,
+  D01-D04) via explicit inline `# noqa: F403` / `# noqa: F405`, no refactor --
+  commit 2113368
+- Verified after each batch: pytest 125/125 passing, 98% coverage (no regression)
+- Closed D39: lint job promoted from continue-on-error:true to blocking in
+  .github/workflows/ci.yml -- commit 62fb82c, confirmed green in GitHub Actions
+- `ruff check .` -> 0 findings (All checks passed!)
 
 ### Phase 0 - Recovery + Migrations Audit (v0.1-stable)
 - Removed martillo_v3/ (stale snapshot)
@@ -219,6 +241,9 @@ Phase 4 metrics:
 - L29: Free tier LLM APIs (NVIDIA NIM, free-claude-code-live proxy) have hard daily/hourly rate limits (e.g., 32 req/worker). On a project of this size (~30 commits, multiple validation rounds), rate limits get exhausted before completing the work. Strategy: when rate limits are hit, switch to deterministic bash/python scripts that don't depend on LLM APIs. Document the limit pattern in POSTMORTEM.md so future projects plan LLM usage budget. The 3-model experiment must be re-scoped: instead of 'compare 3 models on 5 task types', it becomes 'compare models where available, document rate limit impact, and rely on scripts for the rest'.
 - L30: test_ratelimit.py::test_6th_attempt_blocked is intermittently flaky (observed 7 pass / 1 fail across 8 isolated runs, no pytest-randomly installed, no state leakage). Hypothesis: django-ratelimit likely uses fixed time-window buckets (per-minute), so if the 6 sequential requests in the test cross a real minute boundary mid-run, the counter resets and the 6th request is not blocked. Not a regression from the machine migration -- reproduced identically in a fresh environment. Fix (mock the clock or confirm windowing strategy) deferred to Fase 3 (Backend hardening), where LocMemCache/rate limiting is already in scope. Do not fix opportunistically in Fase 0 or Fase 1 threads.
 - L31: pytest-cov with --cov=<package> measures coverage over the ENTIRE package by default, including management commands never meant to be covered by the test suite (e.g., seed_data.py, a manual demo-data script) and even the test files themselves. This can produce a coverage gate failure (--cov-fail-under) that looks like a real regression but is actually a scope problem. Fix: create .coveragerc with an explicit omit list (non-business-logic scripts, migrations/, tests/) so the gate measures only code that SHOULD be tested. Discovered when CI failed at 94% despite 125/125 tests passing -- seed_data.py alone (0% coverage, 65 statements) accounted for the entire gap.
+
+- L32: A venv recreated during a machine migration can silently omit dev-only dependencies (requirements-dev.txt) even when the base requirements.txt was installed correctly, because `pip install -r requirements.txt` alone gives no signal that a second dev file exists and was skipped. Symptom: a tool resolves via PATH to a DIFFERENT install (e.g. a global Python's Scripts folder) with a newer, unpinned version and an expanded default ruleset, producing results that look like new findings but are actually a version/config drift. Always verify `pip list` (or `pip show <package>`) inside the activated venv BEFORE trusting a tool's output, especially after any environment reproduction step (Fase 0 pattern).
+- L33: When fixing ruff F841 (unused local variable) with a short, generic variable name (e.g. single-letter `s`) that repeats across multiple methods in the same test class, a naive find-and-replace (sed without occurrence limiting) can remove the assignment from methods where the variable IS used later, since ruff only flags the specific unused occurrence, not the name pattern. Always grep all occurrences of the exact variable name within the enclosing method/class scope before deciding removal vs prefix-with-underscore, and prefer occurrence-limited sed (e.g. `0,/pattern/{s/pattern/replacement/}`) over a global substitution when the same literal string appears in multiple, behaviorally different locations.
 
 ## Decisions log
 

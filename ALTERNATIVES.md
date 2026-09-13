@@ -125,13 +125,16 @@
 - Reason: token efficiency (English tokens are shorter in LLMs), Claude trained primarily on English, consistency with prompts
 - Action: Phase 0 baseline re-committed with English .md files. README, DEPLOY.md, POSTMORTEM.md remain in Spanish (human consumption).
 
-## D39: CI lint gate mode (informational vs blocking)
+## D39: CI lint gate mode (informational vs blocking) -- CLOSED in Fase 1.5
 
-- Chosen: ruff check runs in CI as a separate job, non-blocking (continue-on-error: true)
+- Chosen (Fase 1): ruff check runs in CI as a separate job, non-blocking (continue-on-error: true)
 - Alternative: blocking gate from the start (fail the workflow on any ruff finding)
 - Reason: first-ever ruff run on ~67 commits of pre-existing code surfaced 29 findings
   (mostly F401 unused imports in tests, a few F841/F811, plus F403/F405 on intentional
   settings star-imports). Blocking immediately would have required mixing a large mechanical
   cleanup into the CI/CD setup thread (Fase 1), violating Phase discipline (CLAUDE.md rule 5).
-- Action: cleanup deferred to Fase 1.5 (lint cleanup), a short dedicated thread before Fase 2.
-  Once Fase 1.5 reaches 0 real findings, revisit continue-on-error and switch to blocking.
+- Action (Fase 1): cleanup deferred to Fase 1.5 (lint cleanup), a short dedicated thread before Fase 2.
+- Closure (Fase 1.5): all 29 findings resolved (22 auto-fixed F401, 3 manually-reviewed F841,
+  3 explicit noqa for intentional F403/F405 settings star-imports). `ruff check .` reaches
+  0 findings. Lint job promoted from continue-on-error:true to blocking, confirmed green in
+  GitHub Actions. D39 is now closed -- no further action needed.

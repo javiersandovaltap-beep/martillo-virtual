@@ -280,7 +280,7 @@ class TestMisSubastasView:
         """User should see only their own subastas"""
         # Create subasta owned by ofertante (not vendedor)
         from subastas.models import Subasta
-        other_subasta = Subasta.objects.create(
+        Subasta.objects.create(
             vendedor=ofertante,
             titulo='Other User Subasta',
             descripcion='desc',
@@ -288,7 +288,7 @@ class TestMisSubastasView:
             fecha_cierre=timezone.now() + timedelta(days=1),
         )
         # Create subasta owned by vendedor
-        my_subasta = Subasta.objects.create(
+        Subasta.objects.create(
             vendedor=vendedor,
             titulo='My Subasta',
             descripcion='desc',

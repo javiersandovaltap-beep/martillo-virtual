@@ -15,7 +15,7 @@ class TestBackfillGanadores:
     def test_no_cerradas_sin_ganador_reports_consistent(self, db):
         """When no cerradas sin ganador, command reports DB consistente."""
         # Create a cerrada WITH ganador (already set)
-        s = Subasta.objects.create(
+        Subasta.objects.create(
             vendedor=__import__('django.contrib.auth.models', fromlist=['User']).User.objects.create_user('v', password='x'),
             titulo='Cerrada Con Ganador',
             descripcion='d',

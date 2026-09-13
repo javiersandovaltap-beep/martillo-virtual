@@ -42,3 +42,6 @@ Thumbs.db
 .pytest_cache/
 .coverage
 htmlcov/
+
+# One-off scripts (single-use fixes, not meant to be reused or reviewed)
+scripts/scratch/

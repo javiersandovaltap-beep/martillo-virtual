@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "deny": [
+      "Edit(AGENTS.md)",
+      "Edit(CLAUDE.md)",
+      "Read(.env)",
+      "Read(**/secrets/**)",
+      "Read(**/.env.*)",
+      "Bash(rm -rf *)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(DROP TABLE*)",
+      "Bash(TRUNCATE*)"
+    ],
+    "allow": [
+      "Bash(pytest *)",
+      "Bash(python -m pytest*)",
+      "Bash(ruff check*)",
+      "Bash(git status)",
+      "Bash(git diff*)",
+      "Bash(git log*)"
+    ],
+    "ask": [
+      "Bash(git commit*)",
+      "Bash(git push*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell.exe",
+            "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${CLAUDE_PROJECT_DIR}/.claude/hooks/run-tests-if-py.ps1"]
+          }
+        ]
+      }
+    ]
+  }
+}

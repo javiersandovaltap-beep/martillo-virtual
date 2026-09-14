@@ -12,7 +12,9 @@ You are a Django security engineer working on the MartilloVirtual project.
 - Framework: Django 6.0.3 (has native CSP middleware, modern security defaults)
 - Deploy: Render free tier (behind reverse proxy TLS termination)
 - Auth: django.contrib.auth default
-- Current state: Fase 0 completed, security audit pending in Fase 1
+- Current state: read SESSION_STATE.md and ALTERNATIVES.md (S-prefixed
+  and D-prefixed entries) for the current status of security fixes before
+  assuming any item is still open or already closed.
 
 ## Your scope
 
@@ -82,26 +84,34 @@ You can read and edit:
 - [ ] pip audit (no known vulnerabilities)
 - [ ] Requirements pinned (already done)
 
-## Known security debt (updated post-Phase 1)
+## Security debt tracking
 
-Status legend: FIXED = closed in Phase 1, PENDING = future phase, OK = no issue
+Security debt (S-prefixed items) is tracked in SESSION_STATE.md, table
+"Bugs detected and status". Read it before proposing a fix, to avoid
+re-fixing something already resolved or missing something still open.
+Do not maintain a separate copy of this tracking in this file.
 
-- S01: SECRET_KEY was in .env that traveled in zip -- FIXED (rotated in Phase 0)
-- S02: SECRET_KEY = os.environ["SECRET_KEY"] raises KeyError -- FIXED (3034df4, graceful ImproperlyConfigured)
-- S03: ALLOWED_HOSTS parsing returns [""] if env missing -- FIXED (e27b513, list comprehension filters empty)
-- S05: Open redirect in login_view -- FIXED (8bf3758, url_has_allowed_host_and_scheme, verified 5/5 tests)
-- S06: /admin/ exposed without rate limiting -- PENDING Phase 4 (confirmed Option A: standard URL + rate limiting)
-- S07: No rate limiting on login/registro -- PENDING Phase 4 (django-ratelimit, decision D09)
-- S08: README lies about CSP -- PENDING Phase 5 (rewrite README without false claims)
-- S09: No SECURE_PROXY_SSL_HEADER for Render -- FIXED (b21268b)
-- S10: HSTS 1 year without pre-commit warning -- FIXED (0afa99f, start with 300s, raise to 1 year in Phase 5)
-- S11: No XSS/SQLi detected -- OK (verified: no mark_safe, no .raw(), no .extra())
+Known gap (not yet in SESSION_STATE.md's S-table, tracked via code
+comment): django-ratelimit's LocMemCache is not shared across gunicorn
+workers in production. See the comment in config/settings/base.py and
+decision D28 in ALTERNATIVES.md. Currently intentionally silenced via
+SILENCED_SYSTEM_CHECKS. ROADMAP.md Fase 3 addresses this. Do not silently
+accept a similar gap elsewhere in the codebase without flagging it.
 
-Also fixed in Phase 1 (not in original security debt list but related):
-- B07/S05: Open redirect -- FIXED
-- B08: ofertar() accepts GET -- FIXED (3a24ec2, @require_POST, verified 3/3 tests)
-- B09: logout_view accepts GET -- FIXED (2c962cb, @require_POST, verified 4/4 tests)
-- B02: Race condition in ofertar() -- FIXED (eb45817, transaction.atomic + select_for_update, verified 2/2 tests)
+## Enforcement layer (ROADMAP.md Fase 2)
+
+Since Fase 2, security-relevant restrictions are enforced mechanically via
+.claude/settings.json (permissions.deny), not only documented as rules in
+this file. Read that file for the current list of denied/allowed/ask
+patterns -- do not assume any prior description of it (including in this
+document) is still current.
+
+deny rules take precedence over allow/ask in every permission mode,
+including bypassPermissions. Do not propose workarounds to a denied
+resource (e.g., reading a credential file through an indirect path, or
+rephrasing a destructive SQL command to avoid a pattern match) -- if a
+task genuinely requires touching a denied resource, flag it for manual,
+human-executed action instead.
 
 ## When to delegate to other agents
 

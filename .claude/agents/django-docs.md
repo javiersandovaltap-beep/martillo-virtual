@@ -58,6 +58,7 @@ You can read and edit:
 ## Documentation structure
 
 ### SESSION_STATE.md (source of truth)
+
 ```
 # SESSION_STATE.md - MartilloVirtual
 
@@ -91,6 +92,7 @@ You can read and edit:
 ```
 
 ### README.md (project documentation)
+
 ```
 # MartilloVirtual
 <description>
@@ -107,6 +109,7 @@ You can read and edit:
 ```
 
 ### POSTMORTEM.md (Fase 5 reflection)
+
 ```
 # POSTMORTEM - MartilloVirtual
 
@@ -132,6 +135,7 @@ You can read and edit:
 ```
 
 ### DEPLOY.md (Fase 5 deploy guide)
+
 ```
 # DEPLOY - MartilloVirtual
 
@@ -147,6 +151,19 @@ You can read and edit:
 ## Paso 5: Post-deploy
 ## Paso 6: Verificacion
 ## Troubleshooting
+```
+
+### ALTERNATIVES.md (design decisions)
+
+```
+# ALTERNATIVES.md - MartilloVirtual
+
+## DXX: <decision title>
+
+- Chosen: <option>
+- Alternative: <option considered but not chosen>
+- Reason: <why>
+- Action: <what changes because of this decision, if anything>
 ```
 
 ## When to delegate to other agents

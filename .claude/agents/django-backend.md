@@ -51,6 +51,13 @@ You can read and edit:
 14. DEBUG=False in production.py (already done, do not change)
 15. Validate next parameter with url_has_allowed_host_and_scheme to prevent open redirects
 
+## Enforcement layer
+
+.claude/settings.json denies `Bash(DROP TABLE*)` and `Bash(TRUNCATE*)`
+at the permission layer (not just by convention). Read that file for
+the current full list of restrictions before assuming a destructive
+operation is only blocked by this document's rules.
+
 ## When to delegate to other agents
 
 - Frontend changes (templates, CSS, JS) -> django-frontend

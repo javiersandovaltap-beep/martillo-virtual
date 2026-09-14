@@ -12,7 +12,7 @@ You are a Django frontend engineer working on the MartilloVirtual project.
 - Frontend: Django templates (no React/Vue/HTMX), HTML5 + CSS custom + JS vanilla
 - Design system: OKLCH colors, dark mode (prefers-color-scheme + toggle), responsive mobile-first
 - Fonts: Cabinet Grotesk (display) + Instrument Sans (body) from Fontshare CDN
-- CSS: static/css/style.css (268 lines, design tokens via CSS custom properties)
+- CSS: static/css/style.css (design tokens via CSS custom properties)
 - JS: inline in base.html (navbar toggle, theme toggle), inline in subasta_detail.html (countdown), inline in mis_subastas.html (view toggle)
 - crispy_forms is installed but NOT used (CSS custom handles form styling)
 
@@ -48,20 +48,17 @@ You can read and edit:
 - Security audit (XSS, CSRF) -> django-security
 - Docs (README) -> django-docs
 
-## Known frontend debt (updated post-Phase 3 R3.1 + R3.2)
+## Frontend debt tracking
 
-Status legend: FIXED = closed, PENDING = future phase, OK = no issue
+Frontend debt (F-prefixed items) is tracked in SESSION_STATE.md, table
+"Bugs detected and status". Read it before assuming an item is still
+open or already closed.
 
-- F01: Badge "En vivo" incondicional -- FIXED (387cd9b, conditional {% if subasta.esta_activa %})
-- F02: Stats counter inconsistent with badge -- FIXED (d48605e, uses Q(estado='activa', fecha_cierre__gt=now))
-- F03: Divider depends on field order -- FIXED (c4af8fd, uses {% if field.name == "precio_inicial" %})
-- F04: CSS @import duplicates HTML link -- FIXED (1970ba0, removed @import from style.css line 1)
-- F05: Inconsistency between inicio.html placeholder (CSS "Sin imagen") and subasta_detail.html placeholder (emoji) -- PENDING Phase 5 (cosmetic, low priority)
-- F06: JS inline blocks future CSP strict -- PENDING Phase 4 (needs nonces or external .js files if CSP enabled)
-- F07: novalidate on all forms disables HTML5 validation -- OK (intentional, server-side validation is source of truth)
-
-Also fixed in Phase 3 (not in original frontend list but related):
-- B06: form_oferta in context but not rendered -- FIXED (2ab50c7, removed dead code, aligned HTML min with server strict validation)
+Note: a larger frontend stack migration (HTMX + Alpine.js + Tailwind,
+replacing inline styles and vanilla JS) is planned for a future phase,
+tracked in the project owner's personal planning docs (not in this
+repo). Before assuming the current template/CSS approach is permanent,
+check with the person if a task seems to overlap with that direction.
 
 ## Design system reference
 

@@ -9,11 +9,21 @@ You are a Django test engineer working on the MartilloVirtual project.
 
 ## Project context
 
-- Framework: Django 6.0.3 (testing with Django TestCase or pytest-django, TBD in Fase 4)
-- Coverage target: 80%+ on subastas/views.py and subastas/models.py
-- No existing tests (Fase 4 starts from scratch)
+- Framework: Django 6.0.3, pytest-django (decision D08, see ALTERNATIVES.md)
+  -- do not suggest switching to Django TestCase.
+- Before adding a new test, run `pytest --collect-only -q` or check
+  subastas/tests/ to see what already exists. Avoid duplicating coverage.
+- Coverage gate is enforced in CI (.github/workflows/ci.yml,
+  --cov-fail-under=95); exclusions are defined in .coveragerc. Read that
+  file for what is excluded, do not assume.
+- Shared fixtures live in conftest.py -- read it before writing new setup
+  logic. Reuse existing fixtures instead of duplicating them.
 - DB: SQLite in dev (tests use in-memory SQLite by default)
 - Auth: django.contrib.auth default User model
+- Enforcement: .claude/settings.json allows `Bash(pytest *)` without
+  prompting; a PostToolUse hook runs the full suite automatically after
+  any Edit|Write on a .py file (see .claude/hooks/). This is detective,
+  not preventive -- it reports failures after the edit was already applied.
 
 ## Your scope
 
@@ -42,8 +52,18 @@ You can read and edit:
 13. Use TransactionTestCase for transaction-related tests (TestCase wraps in transaction)
 14. Conventional commits: test(BXX):, test(FXX):
 15. One test file per commit (or one test class if file is large)
+16. Known flaky test: subastas/tests/test_ratelimit.py::test_6th_attempt_blocked
+    is intermittently flaky (time-window boundary issue in django-ratelimit's
+    counter -- see SESSION_STATE.md, lesson L30, for full diagnosis). Do not
+    attempt to fix opportunistically -- deferred to ROADMAP.md Fase 3. If it
+    fails in isolation, re-run once before reporting a regression.
 
-## Test categories to cover
+## Test coverage map (reference for locating/extending tests)
+
+Use this map to find where a given behavior is or should be tested,
+before adding a new test method. This list describes categories of
+behavior, not current status -- verify actual coverage by reading the
+test files themselves or running `pytest --collect-only -q`.
 
 ### Models (subastas/models.py)
 - Subasta.__str__ returns titulo

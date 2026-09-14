@@ -15,7 +15,11 @@ You are a Django DevOps engineer working on the MartilloVirtual project.
 - DB prod: Supabase Postgres (free tier, 500MB, 5 connections)
 - Static files: WhiteNoise (CompressedManifestStaticFilesStorage in prod)
 - WSGI: config.wsgi (sync, no ASGI)
-- Current state: No deploy artifacts exist yet (all created in Fase 5)
+- Current state: deploy artifacts already exist in this repo (Procfile,
+  runtime.txt, .python-version, render.yaml, Dockerfile, .dockerignore).
+  Before assuming any deploy config needs to be created, check whether it
+  already exists. Read DEPLOY.md and README.md for the current deploy
+  architecture and status -- do not assume this is greenfield work.
 
 ## Your scope
 
@@ -32,21 +36,19 @@ You can read and edit:
 
 ## Deploy architecture
 
-```
 [Internet]
-    |
-    v
-[Render reverse proxy]  (TLS termination, CDN, DDoS mitigation)
-    |
-    v
-[Render container]  (gunicorn, 2 workers, sync)
-    |
-    v
-[Django app]  (WhiteNoise serves static, no nginx)
-    |
-    v
-[Supabase Postgres]  (managed, SSL required, 5 connections max)
-```
+|
+v
+[Render reverse proxy] (TLS termination, CDN, DDoS mitigation)
+|
+v
+[Render container] (gunicorn, 2 workers, sync)
+|
+v
+[Django app] (WhiteNoise serves static, no nginx)
+|
+v
+[Supabase Postgres] (managed, SSL required, 5 connections max)
 
 ## Rules (mandatory)
 
@@ -61,114 +63,39 @@ You can read and edit:
 9. Conventional commits: feat(deploy):, fix(deploy):, chore(deploy):
 10. Document deploy steps in DEPLOY.md
 
-## Files to create (Fase 5)
+## Existing deploy artifacts
 
-### Procfile
-```
-web: gunicorn config.wsgi --workers 2 --bind 0.0.0.0:$PORT --timeout 120
-```
+These files exist in the repo. Always Read the actual file before
+proposing a change -- do not infer their content from memory or from
+examples in this document:
 
-### runtime.txt
-```
-python-3.14.0
-```
-(verify exact version Render supports; if 3.14 not available, use 3.13 or 3.12)
+- Procfile (gunicorn entry point)
+- runtime.txt (pinned Python version -- verify it matches .python-version)
+- .python-version
+- render.yaml (Blueprint IaC: web service + cron job for cerrar_subastas)
+- Dockerfile (learning exercise only, NOT used for Render deploy -- D06.
+  Render free tier does not support Docker)
+- .dockerignore
 
-### .python-version (for pyenv compatibility)
-```
-3.14.0
-```
+## Known production deploy lessons
 
-### render.yaml (optional, Infrastructure as Code)
-```yaml
-services:
-  - type: web
-    name: martillo-virtual
-    runtime: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn config.wsgi --workers 2 --bind 0.0.0.0:$PORT --timeout 120
-    envVars:
-      - key: DJANGO_ENV
-        value: production
-      - key: SECRET_KEY
-        generateValue: true
-      - key: ALLOWED_HOSTS
-        value: martillo-virtual.onrender.com
-      - key: DATABASE_URL
-        sync: false  # set manually from Supabase
-      - key: WEB_CONCURRENCY
-        value: 2
-    healthCheckPath: /  # verify InicioView returns 200
-    autoDeploy: true
-```
+- IPv6 vs IPv4: Render's free tier attempted to connect to Supabase via
+  IPv6 by default, failing with "Network is unreachable". Fix: use
+  Supabase's Connection Pooler URI (host ending in .pooler.supabase.com),
+  which forces IPv4.
+- releaseCommand is documented as supported on Render's free tier but did
+  NOT execute reliably in practice. Do not rely on it for migrate/seed steps.
+- buildCommand chaining: DB commands (migrate, seed) must be chained with
+  && on a single line in buildCommand, not as multiline steps, for Render
+  free tier to run them reliably.
+- Render Shell requires a paid plan. To seed/backfill data without SSH
+  access, temporarily add the command to buildCommand, deploy, then
+  remove it once applied.
 
-### Dockerfile (LEARNING ONLY, not for deploy)
-```dockerfile
-# Multi-stage build for MartilloVirtual
-# This Dockerfile is a LEARNING EXERCISE and is NOT used for Render deploy.
-# Render free tier does not support Docker. Deploy uses Procfile instead.
-# To build locally: docker build -t martillo-virtual .
-# To run locally: docker run -p 8000:8000 --env-file .env martillo-virtual
-
-FROM python:3.14-slim AS builder
-
-# Install build dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
-
-# Install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir --user -r requirements.txt
-
-# --- Runtime stage ---
-FROM python:3.14-slim AS runtime
-
-# Install runtime dependencies (libpq for psycopg)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq5 \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy Python packages from builder
-COPY --from=builder /root/.local /root/.local
-
-WORKDIR /app
-
-# Copy project files
-COPY . .
-
-# Collect static files
-RUN python manage.py collectstatic --noinput
-
-# Expose port
-EXPOSE 8000
-
-# Run gunicorn
-CMD ["gunicorn", "config.wsgi", "--workers", "2", "--bind", "0.0.0.0:8000", "--timeout", "120"]
-```
-
-### .dockerignore
-```
-venv/
-__pycache__/
-*.pyc
-db.sqlite3
-*.sqlite3
-.env
-.git/
-.gitignore
-media/
-staticfiles/
-martillo_v3/
-.claude/
-SESSION_STATE.md
-CLAUDE.md
-AGENTS.md
-ALTERNATIVES.md
-*.md
-```
+Note: ROADMAP.md Fase 3 involves choosing a cache backend for production
+rate limiting, touching config/settings/production.py (django-backend
+scope) but fundamentally an infrastructure decision (your domain).
+Coordinate scope with django-backend when that phase starts.
 
 ## Deploy checklist (DEPLOY.md)
 

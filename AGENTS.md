@@ -27,12 +27,15 @@ based on the description field in the frontmatter.
 
 | Agent | Scope | Tools | LLM routing |
 |-------|-------|-------|-------------|
-| django-backend | views, models, forms, urls, admin, management commands, migrations | Read, Edit, Write, Bash, Grep, Glob | opus/Minimax or sonnet/Nemotron |
-| django-frontend | templates, static, CSS, JS vanilla | Read, Edit, Write, Bash, Grep, Glob | haiku/GLM-5.1 or sonnet/Nemotron |
-| django-test | Django tests, coverage, fixtures | Read, Edit, Write, Bash, Grep, Glob | opus/Minimax |
-| django-security | audit, hardening, OWASP | Read, Edit, Write, Bash, Grep, Glob | opus/Minimax |
-| django-devops | Dockerfile, render.yaml, Procfile, deploy | Read, Edit, Write, Bash, Grep, Glob | opus/Minimax |
-| django-docs | README, POSTMORTEM, SESSION_STATE.md | Read, Edit, Write, Bash, Grep, Glob | sonnet/Nemotron |
+| django-backend | views, models, forms, urls, admin, management commands, migrations | Read, Edit, Write, Bash, Grep, Glob | opus or sonnet |
+| django-frontend | templates, static, CSS, JS vanilla | Read, Edit, Write, Bash, Grep, Glob | haiku or sonnet |
+| django-test | Django tests, coverage, fixtures | Read, Edit, Write, Bash, Grep, Glob | opus |
+| django-security | audit, hardening, OWASP | Read, Edit, Write, Bash, Grep, Glob | opus |
+| django-devops | Dockerfile, render.yaml, Procfile, deploy | Read, Edit, Write, Bash, Grep, Glob | opus |
+| django-docs | README, POSTMORTEM, SESSION_STATE.md | Read, Edit, Write, Bash, Grep, Glob | sonnet |
+
+Real slot-to-model mapping lives in .claude/routing.local.md (gitignored,
+not part of this repo).
 
 Each agent defines:
 - Specific role
@@ -81,7 +84,8 @@ Each agent defines:
 
 ## Orthogonality: LLM routing vs subagents
 
-The LLM routing (opus/sonnet/haiku -> Minimax/Nemotron/GLM-5.1) is ORTHOGONAL to subagents.
+The LLM routing (opus/sonnet/haiku) is ORTHOGONAL to subagents. Real model
+mapping for each slot lives in .claude/routing.local.md (gitignored).
 A django-backend subagent can run with any model depending on the specific task.
 
 - LLM routing is decided by TASK TYPE (tests, docs, migrations, etc.)
@@ -89,47 +93,48 @@ A django-backend subagent can run with any model depending on the specific task.
 
 Example: "refactor ofertar() to service layer"
 - Subagent: django-backend (backend domain)
-- LLM routing: opus/Minimax (view refactor type)
+- LLM routing: opus (view refactor type)
 
 Example: "test for ofertar()"
 - Subagent: django-test (tests domain)
-- LLM routing: opus/Minimax (Django tests type)
+- LLM routing: opus (Django tests type)
 
 ## 3-model experiment (5 task types)
 
 Each task type is executed with 1-2 different models to compare:
 
 1. Operational docs: 1 file per model
-   - CLAUDE.md (Nemotron)
-   - AGENTS.md (GLM-5.1)
-   - ALTERNATIVES.md (Minimax)
+   - CLAUDE.md (sonnet)
+   - AGENTS.md (haiku)
+   - ALTERNATIVES.md (opus)
    Comparison: clarity, completeness, rule adherence
 
 2. Django tests: 1 file per model
-   - tests_views.py (Minimax)
-   - tests_models.py (Nemotron)
-   - tests_forms.py (GLM-5.1)
+   - tests_views.py (opus)
+   - tests_models.py (sonnet)
+   - tests_forms.py (haiku)
    Comparison: coverage, assertion quality, fixture handling
 
 3. HTML templates: 1 file per model
-   - subasta_detail.html refactor (GLM-5.1)
-   - subasta_form.html refactor (Nemotron)
-   - mis_subastas.html refactor (Minimax)
+   - subasta_detail.html refactor (haiku)
+   - subasta_form.html refactor (sonnet)
+   - mis_subastas.html refactor (opus)
    Comparison: Django template syntax, accessibility, UX
 
 4. DB migrations: 1 file per model
-   - 0003_indexes.py (Minimax)
-   - 0004_squash.py (Nemotron)
-   - 0005_ganador_fk.py (GLM-5.1)
+   - 0003_indexes.py (opus)
+   - 0004_squash.py (sonnet)
+   - 0005_ganador_fk.py (haiku)
    Comparison: dependencies, data loss risk, reversibility
 
 5. View refactors: 1 file per model
-   - ofertar -> service layer (Minimax)
-   - login_view -> LoginView CBV (Nemotron)
-   - registro -> SignUpView CBV (GLM-5.1)
+   - ofertar -> service layer (opus)
+   - login_view -> LoginView CBV (sonnet)
+   - registro -> SignUpView CBV (haiku)
    Comparison: Django patterns, readability, testability
 
-Comparison is documented in POSTMORTEM.md at the end (Phase 5).
+Comparison is documented in POSTMORTEM.md at the end (Phase 5). Real
+slot-to-model mapping used lives in .claude/routing.local.md (gitignored).
 
 ## Updates to this file
 

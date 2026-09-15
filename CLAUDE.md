@@ -56,16 +56,19 @@ Hard rule: do NOT mix layers. If Layer 1 fails, do not attempt Layer 3 until Lay
 
 ## Model routing (5 task types)
 
-| Task type | Claude Code slot | Real model | Justification |
-|-----------|------------------|------------|---------------|
-| Operational docs | sonnet | Nemotron | Mechanical + L13 cross-check |
-| Django tests | opus | Minimax M2.7 | Reasoning on views/models/forms |
-| HTML templates | haiku | GLM-5.1 | Mechanical + compare style |
-| DB migrations | opus | Minimax M2.7 | Schema/data reasoning |
-| View refactors | opus | Minimax M2.7 | Django patterns (CBV/FBV/service) |
-| Security audit | opus | Minimax M2.7 | Attack vectors |
-| Settings split | bash script | N/A | Mechanical |
-| Deploy artifacts | opus | Minimax M2.7 | Build size, layers, gunicorn |
+| Task type | Claude Code slot | Justification |
+|-----------|------------------|---------------|
+| Operational docs | sonnet | Mechanical + L13 cross-check |
+| Django tests | opus | Reasoning on views/models/forms |
+| HTML templates | haiku | Mechanical + compare style |
+| DB migrations | opus | Schema/data reasoning |
+| View refactors | opus | Django patterns (CBV/FBV/service) |
+| Security audit | opus | Attack vectors |
+| Settings split | bash script | Mechanical |
+| Deploy artifacts | opus | Build size, layers, gunicorn |
+
+Real slot-to-model mapping lives in .claude/routing.local.md (gitignored,
+not part of this repo).
 
 ## Subagents (.claude/agents/)
 
@@ -89,7 +92,8 @@ Claude Code invokes subagents automatically based on task type:
 
 ## Shell and encoding
 
-- Claude Code uses Git Bash (not PowerShell) on Windows
+- Claude Code runs from PowerShell on Windows (not Git Bash). Git Bash is
+  used only for manual validation outside Claude Code sessions.
 - Set PYTHONIOENCODING=utf-8 in bash scripts that run python
 - For Windows paths in Python: use cygpath -m to convert /c/Users/... to C:/Users/...
 - curl.exe (not curl alone) for HTTP validation on Windows

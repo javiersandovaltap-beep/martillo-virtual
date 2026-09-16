@@ -5,9 +5,9 @@
 
 ## Current state
 
-- Phase: v2.0 ROADMAP - Fase 1.5 (lint cleanup) CLOSED, Fase 2 (playbook enforcement) next
-- Last commit: ci: promote ruff lint job from informational to blocking
-- Last tag: v2.0-fase1.5-stable
+- Phase: v2.0 ROADMAP - Fase 2 (playbook enforcement + agnostic routing) CLOSED, Fase 3 (backend hardening) next
+- Last commit: docs(fase2): add D40 - defer internal-docs relocation to Fase 6
+- Last tag: v2.0-fase1.5-stable (v2.0-fase2-stable to be tagged after this commit)
 - Blockers: none
 - Known flaky test: test_ratelimit.py::test_6th_attempt_blocked (see L30) -- reproduced once more during Fase 1.5 isolated re-run (1 fail in full suite, 3/3 pass standalone), still deferred to Fase 3
 - Lint debt: RESOLVED (see D39 closure in ALTERNATIVES.md). Lint gate is now blocking in CI.
@@ -51,6 +51,39 @@ Project status: DEPLOYED IN PRODUCTION
   -- mechanical cleanup deferred to Fase 1.5 to avoid scope creep in this thread (see D39)
 
 ## Phase history
+
+### Fase 2 - Playbook enforcement + agnostic routing (v2.0-fase2-stable)
+- feat(fase2): .claude/settings.json with permissions.deny (Edit CLAUDE.md/
+  AGENTS.md, Read .env/secrets, Bash rm -rf/git push --force/DROP TABLE/
+  TRUNCATE), allow (pytest, ruff check, git status/diff/log), ask (git
+  commit/push) -- commit 6a0d032
+- feat(fase2): PostToolUse hook (.claude/hooks/run-tests-if-py.ps1) runs
+  full pytest suite on Edit|Write of any .py file, detective not
+  preventive -- same commit 6a0d032
+- docs(agents): rewrote all 6 subagents in .claude/agents/ to reference
+  live sources of truth (SESSION_STATE.md, .coveragerc, pytest
+  --collect-only, actual files) instead of embedding state snapshots
+  that go stale -- commits 7370735, f248d8b, 9fb5b0b
+- docs: CLAUDE.md Model routing table stripped of real NIM model names,
+  now lists only agnostic slots (opus/sonnet/haiku) + pointer to
+  .claude/routing.local.md; fixed factual error in Shell and encoding
+  section (was "Claude Code uses Git Bash", corrected to PowerShell) --
+  commit 68be834
+- docs: AGENTS.md given same agnostic-slot treatment across 3 sections
+  (Layer 2 - Execution table, Orthogonality examples, 3-model experiment
+  file-to-model assignments) -- commit 64a5ce7
+- feat(fase2): .claude/routing.local.md created (gitignored) with real
+  slot -> NIM model mapping (opus=kimi-k3, sonnet=nemotron-3-super,
+  haiku=deepseek-v4-flash) + infra lessons L22/L29, not portable to
+  official Anthropic API users
+- chore(fase2): .gitignore updated to cover .claude/routing.local.md --
+  commit ea40382
+- docs(fase2): added D40 to ALTERNATIVES.md, deferring relocation of
+  SESSION_STATE.md/POSTMORTEM.md/ALTERNATIVES.md to .claude/local/ until
+  Fase 6 (repo-architecture decision, out of scope for enforcement/
+  routing phase) -- commit ac282e3
+- docs: this commit closes Fase 2 in SESSION_STATE.md (L34 BOM lesson,
+  Last commit/tag/Phase fields, this Phase history entry)
 
 ### Fase 1.5 - Lint cleanup (v2.0-fase1.5-stable)
 - Root cause found before cleanup: venv (recreated during Fase 0 machine migration)
@@ -244,6 +277,8 @@ Phase 4 metrics:
 
 - L32: A venv recreated during a machine migration can silently omit dev-only dependencies (requirements-dev.txt) even when the base requirements.txt was installed correctly, because `pip install -r requirements.txt` alone gives no signal that a second dev file exists and was skipped. Symptom: a tool resolves via PATH to a DIFFERENT install (e.g. a global Python's Scripts folder) with a newer, unpinned version and an expanded default ruleset, producing results that look like new findings but are actually a version/config drift. Always verify `pip list` (or `pip show <package>`) inside the activated venv BEFORE trusting a tool's output, especially after any environment reproduction step (Fase 0 pattern).
 - L33: When fixing ruff F841 (unused local variable) with a short, generic variable name (e.g. single-letter `s`) that repeats across multiple methods in the same test class, a naive find-and-replace (sed without occurrence limiting) can remove the assignment from methods where the variable IS used later, since ruff only flags the specific unused occurrence, not the name pattern. Always grep all occurrences of the exact variable name within the enclosing method/class scope before deciding removal vs prefix-with-underscore, and prefer occurrence-limited sed (e.g. `0,/pattern/{s/pattern/replacement/}`) over a global substitution when the same literal string appears in multiple, behaviorally different locations.
+
+- L34: In Windows PowerShell 5.1 (not PowerShell Core), `Set-Content -Encoding utf8` writes UTF-8 WITH a BOM (byte order mark) by default. This breaks tools that expect clean UTF-8 without BOM, such as `python -m json.tool` (fails to parse .claude/settings.json if the BOM is present). Fix: write files with `[System.IO.File]::WriteAllText($path, $content, (New-Object System.Text.UTF8Encoding($false)))` instead, which explicitly omits the BOM. This lesson applies specifically to hooks/config files written from PowerShell scripts (e.g. .claude/hooks/*.ps1 generating other files) during Fase 2.
 
 ## Decisions log
 

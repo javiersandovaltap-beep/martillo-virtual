@@ -138,3 +138,20 @@
   3 explicit noqa for intentional F403/F405 settings star-imports). `ruff check .` reaches
   0 findings. Lint job promoted from continue-on-error:true to blocking, confirmed green in
   GitHub Actions. D39 is now closed -- no further action needed.
+
+## D40: Internal-only docs (SESSION_STATE.md, POSTMORTEM.md, ALTERNATIVES.md) tracked in repo root
+
+- Current: SESSION_STATE.md, POSTMORTEM.md, ALTERNATIVES.md live tracked
+  in the repo root, with full commit history already in git.
+- Alternative: move to .claude/local/ (gitignored), matching the pattern
+  already used in other personal projects, keeping only public-facing
+  docs (README.md, DEPLOY.md) in the repo root.
+- Reason not to act now: this is a repo-architecture decision (what is
+  public vs. internal), not enforcement or routing -- out of scope for
+  Fase 2. Moving already-tracked files requires git rm --cached (history
+  rewrite of tracking, not a gitignore-only change), a different risk
+  category than the routing.local.md addition done in this phase.
+- Action: deferred to Fase 6 (Arquitectura y cierre de portfolio), same
+  thread where README/POSTMORTEM public-facing review already happens.
+  To resolve together with the still-pending ROADMAP.md file-name
+  reference fix in django-test.md/django-devops.md (also deferred).

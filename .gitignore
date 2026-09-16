@@ -45,3 +45,8 @@ htmlcov/
 
 # One-off scripts (single-use fixes, not meant to be reused or reviewed)
 scripts/scratch/
+
+# Claude Code NIM routing (Fase 2 v2.0 ROADMAP: playbook enforcement + agnostic routing)
+# Real slot -> NIM model mapping and infra-specific lessons. Not portable to
+# someone using the official Anthropic API, so it stays local and untracked.
+.claude/routing.local.md

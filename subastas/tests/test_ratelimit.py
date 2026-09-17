@@ -8,6 +8,7 @@ Covers:
 """
 from django.test import Client
 from django.urls import reverse
+from freezegun import freeze_time
 
 
 def get_client():
@@ -30,14 +31,18 @@ class TestLoginRateLimit:
             assert response.status_code == 200  # Form re-rendered
 
     def test_6th_attempt_blocked(self, db, vendedor):
-        """6th login attempt within 1 minute should be blocked (403)"""
-        c = get_client()
-        # Make 5 failed attempts
-        for _ in range(5):
-            c.post(reverse('subastas:login'), {'username': 'wrong', 'password': 'wrong'})
-        # 6th should be blocked
-        response = c.post(reverse('subastas:login'), {'username': 'wrong', 'password': 'wrong'})
-        assert response.status_code == 403  # Ratelimited -> Django default 403
+        """6th login attempt within 1 minute should be blocked (403).
+        Time is frozen for this test (L30): django-ratelimit uses fixed
+        wall-clock windows, so without freezing the clock this test can
+        flake if real time crosses a window boundary mid-test."""
+        with freeze_time("2026-01-01 12:00:00"):
+            c = get_client()
+            # Make 5 failed attempts
+            for _ in range(5):
+                c.post(reverse('subastas:login'), {'username': 'wrong', 'password': 'wrong'})
+            # 6th should be blocked
+            response = c.post(reverse('subastas:login'), {'username': 'wrong', 'password': 'wrong'})
+            assert response.status_code == 403  # Ratelimited -> Django default 403
 
     def test_valid_login_under_limit_works(self, db, vendedor):
         """Valid login when under the rate limit should succeed"""

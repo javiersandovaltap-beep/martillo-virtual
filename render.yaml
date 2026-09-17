@@ -34,6 +34,11 @@ services:
         value: 2
       - key: PYTHON_VERSION
         value: 3.14.5
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: martillo-ratelimit-cache
+          property: connectionString
 
   # Cron job to close expired subastas (runs every hour)
   - type: cron
@@ -53,3 +58,8 @@ services:
         sync: false  # set manually from Supabase
       - key: PYTHON_VERSION
         value: 3.14.5
+
+  - type: keyvalue
+    name: martillo-ratelimit-cache
+    plan: free
+    ipAllowList: []

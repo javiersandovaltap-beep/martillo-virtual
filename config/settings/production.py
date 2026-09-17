@@ -13,6 +13,20 @@ DATABASES = {
     )
 }
 
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": os.environ["REDIS_URL"],
+    }
+}
+
+# Override base.py: production now uses a shared Redis cache (Render
+# Key Value) for django-ratelimit, so LocMemCache's per-worker isolation
+# no longer applies here. The E003/W001 checks silenced in base.py are
+# a dev-only concern and must not be silenced in production.
+SILENCED_SYSTEM_CHECKS = []
+
+
 SECURE_SSL_REDIRECT            = True
 # Empezar con 5 minutos. Subir a 31536000 (1 ano) en Fase 5 post-deploy exitoso.
 # HSTS es irreversible por la duracion configurada en browsers que visiten.

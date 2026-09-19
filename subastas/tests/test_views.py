@@ -103,6 +103,18 @@ class TestDetalleView:
         response = c.get(reverse('subastas:detalle', kwargs={'pk': subasta_activa.pk}))
         assert 'form_oferta' not in response.context
 
+    def test_expired_subasta_not_shown_as_en_vivo(self, db, subasta_expirada):
+        """Subasta with estado=activa but fecha_cierre in past should NOT show 'En vivo' badge (or should show 'Cerrada') in DetalleView"""
+        c = get_client()
+        response = c.get(reverse('subastas:detalle', kwargs={'pk': subasta_expirada.pk}))
+        content = response.content.decode('utf-8')
+        # The subasta is shown but badge should not be 'En vivo' (since esta_activa=False)
+        assert 'Test Subasta Expirada' in content
+        # Should NOT show 'En vivo' badge
+        assert 'En vivo' not in content
+        # Should show 'Cerrada' badge instead
+        assert 'Cerrada' in content
+
 
 # ============================================================================
 # CrearSubastaView
@@ -315,6 +327,15 @@ class TestMisSubastasView:
         assert response.context['activas'] == 1
         assert response.context['cerradas'] == 1
 
+    def test_expired_subasta_not_shown_as_en_vivo(self, db, vendedor, subasta_expirada):
+        """Subasta with estado=activa but fecha_cierre in past should NOT show 'En vivo' badge in MisSubastasView"""
+        c = get_client(vendedor)
+        response = c.get(reverse('subastas:mis_subastas'))
+        content = response.content.decode('utf-8')
+        # The subasta appears (because owned by user and estado=activa) but badge doesn't (because esta_activa=False)
+        assert 'Test Subasta Expirada' in content
+        # Count 'En vivo' badges: should be 0 (no active subastas in this test)
+        assert content.count('En vivo') == 0
 
 # ============================================================================
 # login_view

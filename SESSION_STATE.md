@@ -331,7 +331,7 @@ Phase 4 metrics:
 | B08 | seed_data.py broken (ESTADO_ACTIVA) | Phase 0 | fixed |
 | B09 | Logout without @require_POST | Phase 1 | fixed (2c962cb) |
 | B10 | fecha_inicio and creado_en redundant | Phase 3 | fixed (8481ec2) |
-| F01 | "En vivo" badge unconditional | Phase 3 | pending |
+| F01 | "En vivo" badge unconditional | Phase 3 | fixed (387cd9b, confirmed no regression via new tests this thread) |
 | F02 | Stats counter inconsistent with badge | Phase 3 | fixed (d48605e) |
 | F03 | Divider depends on field order | Phase 3 | fixed (c4af8fd) |
 | F04 | CSS @import duplicates HTML link | Phase 3 | fixed (1970ba0) |
